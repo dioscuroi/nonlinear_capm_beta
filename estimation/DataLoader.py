@@ -25,6 +25,13 @@ class DataLoader:
         password = config.MYSQL_PASSWORD
         database = config.MYSQL_DATABASE
 
+        print("")
+        print("SQL Connection Info")
+        print("- Host: {}".format(host))
+        print("- Port: {}".format(port))
+        print("- User: {}".format(user))
+        print("- Database: {}".format(database))
+
         self.connection = pymysql.connect(host=host, port=port, user=user, password=password,
                                    db=database, charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
 

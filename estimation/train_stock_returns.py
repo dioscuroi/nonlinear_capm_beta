@@ -80,21 +80,21 @@ def train_stock_returns(year_from=1931, year_to=2016, max_rank=500):
             x_data = x_data.as_matrix()
 
             # Initialize the trainer
-            try:
-                trainer = Trainer(depth=2, width=1, no_inputs=21, zero_init=True)
+            # try:
+            trainer = Trainer(depth=2, width=1, no_inputs=21, zero_init=True)
 
-                trainer.run_ols_regression(x_data, y_data)
+            trainer.run_ols_regression(x_data, y_data)
 
-                # launch the learning
-                params = trainer.train(x_data, y_data)
+            # launch the learning
+            params = trainer.train(x_data, y_data)
 
-                loader.save_stock_params(year, permno, no_obs, date_from, date_to, params)
+            loader.save_stock_params(year, permno, no_obs, date_from, date_to, params)
 
-                del trainer
+            del trainer
 
-            except:
-                print("Unexpected error: ", sys.exc_info()[0])
-                print("Skip this permno and move on to the next one")
+            # except:
+            #     print("Unexpected error: ", sys.exc_info()[0])
+            #     print("Skip this permno and move on to the next one")
 
             elapsed = time.time() - t_start
 
