@@ -37,7 +37,7 @@ class DataLoader:
 
         query = """
             select date, mktrf, rf
-            from FamaFrench_3factors_{}
+            from FamaFrench.3factors_{}
         """.format(freq)
 
         if (date_from is not None) & (date_to is not None):
@@ -68,11 +68,11 @@ class DataLoader:
         parts = name.split('_')
 
         if parts[0] == 'size':
-            table = 'FamaFrench_portfolio_size'
+            table = 'FamaFrench.portfolio_size'
         elif parts[0] == 'value':
-            table = 'FamaFrench_portfolio_value'
+            table = 'FamaFrench.portfolio_value'
         else:
-            table = 'FamaFrench_3factors'
+            table = 'FamaFrench.3factors'
 
         if freq == 'daily':
             table = table + '_daily'
@@ -189,7 +189,7 @@ class DataLoader:
 
         query = """
             select date, ret
-            from CRSP_stocks_daily
+            from CRSP.stocks_daily
             where permno = {} and date >= '{}' and date <= '{}'
         """.format(permno, date_from, date_to)
 

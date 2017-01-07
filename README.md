@@ -1,1 +1,1 @@
-# nonlinear-capm-beta
+# nonlinear_capm_beta

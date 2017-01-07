@@ -117,9 +117,11 @@ if __name__ == "__main__":
         year_to = int(sys.argv[2])
         max_rank = int(sys.argv[3])
 
-        train_stock_returns(year_from, year_to, max_rank)
-
     else:
-        train_stock_returns()
+        year_from = 1937
+        year_to = 2015
+        max_rank = 500
+
+    train_stock_returns(year_from, year_to, max_rank)
 
     print('** beep **\a')
