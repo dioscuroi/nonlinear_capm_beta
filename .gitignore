@@ -1,0 +1,5 @@
+__pycache__
+.idea
+sql_query/*.spf
+
+config.py
