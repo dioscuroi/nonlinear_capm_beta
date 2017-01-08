@@ -42,13 +42,13 @@ class DataLoader:
         """load_market_returns
         """
 
-        query = """
-            select date, mktrf, rf
-            from FamaFrench.3factors_{}
-        """.format(freq)
+        query = 'select date, mktrf, rf from FamaFrench.3factors'
+
+        if freq == 'daily':
+            query += '_daily'
 
         if (date_from is not None) & (date_to is not None):
-            query = query + 'where date >= "{}" and date <= "{}"'.format(date_from, date_to)
+            query += ' where date >= "{}" and date <= "{}"'.format(date_from, date_to)
 
         with self.connection.cursor() as cur:
             cur.execute(query)
@@ -68,39 +68,33 @@ class DataLoader:
 
         return df.loc[~idx]
 
-    def load_portfolio_returns(self, name, freq, log_returns=False):
+    def load_portfolio_returns(self, freq, name, log_returns=False):
         """load_market_returns
         """
 
-        parts = name.split('_')
+        switcher = {
+            'size_lo': 'select date, d1 from FamaFrench.portfolio_size',
+            'size_hi': 'select date, d10 from FamaFrench.portfolio_size',
+            'value_lo': 'select date, d1 from FamaFrench.portfolio_value',
+            'value_hi': 'select date, d10 from FamaFrench.portfolio_value',
+            'smb': 'select date, smb from FamaFrench.3factors',
+            'hml': 'select date, hml from FamaFrench.3factors',
+            'small_growth': 'select date, p11 from FamaFrench.portfolio_size_value',
+            'small_value': 'select date, p15 from FamaFrench.portfolio_size_value',
+            'large_growth': 'select date, p51 from FamaFrench.portfolio_size_value',
+            'large_value': 'select date, p55 from FamaFrench.portfolio_size_value'
+        }
 
-        if parts[0] == 'size':
-            table = 'FamaFrench.portfolio_size'
-        elif parts[0] == 'value':
-            table = 'FamaFrench.portfolio_value'
-        else:
-            table = 'FamaFrench.3factors'
+        query = switcher[name]
 
-        if freq == 'daily':
-            table = table + '_daily'
-        elif (freq == 'monthly') & (len(parts) == 1):
-            table = table + '_monthly'
-
-        if len(parts) > 1:
-            if parts[1] == 'lo':
-                column = 'd1'
-            elif parts[1] == 'hi':
-                column = 'd10'
-        else:
-            column = parts[0]
-
-        query = 'select date, {} from {}'.format(column, table)
+        if query == 'daily':
+            query += '_daily'
 
         with self.connection.cursor() as cur:
             cur.execute(query)
 
             df = pd.DataFrame(cur.fetchall())
-            df = df.rename(columns={column:'pfret'})
+            df = df.rename(columns={cur._fields[1]:'pfret'})
 
         if log_returns:
             df['pfret'] = np.log(1 + df['pfret']/100) * 100

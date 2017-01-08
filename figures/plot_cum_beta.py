@@ -37,6 +37,9 @@ def plot_cum_beta(freq="monthly"):
 
     portfolio_list = ['size_lo', 'size_hi', 'value_lo', 'value_hi', 'smb', 'hml']
 
+    if freq == 'monthly':
+        portfolio_list.extend(['small_growth', 'small_value', 'large_growth', 'large_value'])
+
     for portfolio in portfolio_list:
 
         print("Portfolio: {}".format(portfolio))
@@ -67,6 +70,6 @@ def plot_cum_beta(freq="monthly"):
     loader.close()
 
 if __name__ == "__main__":
-    plot_cum_beta("daily")
+    # plot_cum_beta("daily")
     plot_cum_beta("monthly")
 

@@ -29,6 +29,10 @@ def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name = N
     # now run the machine learning on portfolio returns
     if portfolio_name is None:
         portfolio_list = ['size_lo', 'size_hi', 'value_lo', 'value_hi', 'smb', 'hml']
+
+        if freq == 'monthly':
+            portfolio_list.extend(['small_growth', 'small_value', 'large_growth', 'large_value'])
+
     else:
         portfolio_list = [portfolio_name]
 
@@ -41,7 +45,7 @@ def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name = N
         print(" ")
 
         # Load portfolio returns
-        pf_returns = loader.load_portfolio_returns(portfolio, freq, log_returns=log_returns)
+        pf_returns = loader.load_portfolio_returns(freq, portfolio, log_returns=log_returns)
 
         merged = pd.merge(mktrf, pf_returns, on='date')
 
@@ -51,7 +55,6 @@ def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name = N
         x_data = merged.iloc[:,1:-1]
         del x_data['rf']
         x_data = x_data.as_matrix()
-
 
         # Initialize the trainer
         trainer = Trainer(depth, width, no_lags+1)
@@ -73,7 +76,6 @@ def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name = N
     loader.close()
 
     return
-
 
 
 # call the main function when called directly
