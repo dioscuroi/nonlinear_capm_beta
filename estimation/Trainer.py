@@ -264,11 +264,13 @@ class Trainer:
         """derive_expret_beta
         """
 
+        tf.reset_default_graph()
+
         [X, model, _, _, _] = self.build_a_tree()
 
         diff = tf.gradients(model, [X])
 
-        init = tf.initialize_all_variables()
+        init = tf.global_variables_initializer()
 
         sess = tf.Session()
         sess.run(init)
