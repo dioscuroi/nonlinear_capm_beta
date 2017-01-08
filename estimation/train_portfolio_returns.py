@@ -66,7 +66,7 @@ def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name = N
         # launch the learning
         params = trainer.train(x_data, y_data)
 
-        loader.save_portfolio_params(params, portfolio, freq, no_lags, depth, width)
+        loader.save_portfolio_params(params, name=portfolio, freq=freq, lags=no_lags, depth=depth, width=width)
 
         del trainer
 

@@ -8,6 +8,7 @@ def plot_cum_beta(freq="monthly"):
     """plot_cum_beta
     """
 
+    print("")
     print("***********************************")
     print(" plot_cum_beta() ")
     print(" freq: {}".format(freq))

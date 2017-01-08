@@ -116,8 +116,8 @@ class DataLoader:
         query = """
             select parameters
             from beta_parameters_portfolios
-            where name = '{}' and freq = '{}' and lags = {} and depth = {} and width = {}
-        """.format(name, freq, lags, depth, width)
+            where freq = '{}' and name = '{}' and lags = {} and depth = {} and width = {}
+        """.format(freq, name, lags, depth, width)
 
         with self.connection.cursor() as cur:
             cur.execute(query)
@@ -139,16 +139,16 @@ class DataLoader:
         if check_if_exist is None:
             query = """
               insert into beta_parameters_portfolios
-              (name, freq, lags, depth, width, parameters)
+              (freq, name, lags, depth, width, parameters)
               values ('{}', '{}', {}, {}, {}, '{}')
-            """.format(name, freq, lags, depth, width, json.dumps(params))
+            """.format(freq, name, lags, depth, width, json.dumps(params))
 
         else:
             query = """
               update beta_parameters_portfolios
               set parameters = '{}'
-              where name = '{}' and freq = '{}' and lags = {} and depth = {} and width = {}
-            """.format(json.dumps(params), name, freq, lags, depth, width)
+              where freq = '{}' and name = '{}' and lags = {} and depth = {} and width = {}
+            """.format(json.dumps(params), freq, name, lags, depth, width)
 
         with self.connection.cursor() as cur:
             cur.execute(query)
