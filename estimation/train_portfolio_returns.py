@@ -28,7 +28,7 @@ def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name = N
 
     # now run the machine learning on portfolio returns
     if portfolio_name is None:
-        portfolio_list = ['size_lo', 'size_hi', 'value_lo', 'value_hi', 'smb', 'hml']
+        portfolio_list = ['small', 'large', 'growth', 'value', 'smb', 'hml']
 
         if freq == 'monthly':
             portfolio_list.extend(['small_growth', 'small_value', 'large_growth', 'large_value'])

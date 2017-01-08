@@ -73,10 +73,10 @@ class DataLoader:
         """
 
         switcher = {
-            'size_lo': 'select date, d1 from FamaFrench.portfolio_size',
-            'size_hi': 'select date, d10 from FamaFrench.portfolio_size',
-            'value_lo': 'select date, d1 from FamaFrench.portfolio_value',
-            'value_hi': 'select date, d10 from FamaFrench.portfolio_value',
+            'small': 'select date, d1 from FamaFrench.portfolio_size',
+            'large': 'select date, d10 from FamaFrench.portfolio_size',
+            'growth': 'select date, d1 from FamaFrench.portfolio_value',
+            'value': 'select date, d10 from FamaFrench.portfolio_value',
             'smb': 'select date, smb from FamaFrench.3factors',
             'hml': 'select date, hml from FamaFrench.3factors',
             'small_growth': 'select date, p11 from FamaFrench.portfolio_size_value',
