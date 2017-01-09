@@ -17,15 +17,19 @@ def plot_cum_beta(freq="monthly"):
     if freq == "monthly":
         no_lags = 1
         mktrf = np.arange(-15, 15 + 0.001, .2)
+        # portfolio_list = ['small_growth', 'small_value', 'large_growth', 'large_value', 'smb', 'hml']
+        portfolio_list = ['small_growth', 'small_value', 'large_growth', 'large_value', 'smb', 'hml', 'small', 'large', 'growth', 'value']
+
     else:
         no_lags = 20
         mktrf = np.arange(-3, 3 + 0.001, .1)
+        portfolio_list = ['small', 'large', 'growth', 'value', 'smb', 'hml']
 
     # Beta plot is drawn on the basis that RmRf is a vector of equal values
-    x_data = np.zeros([no_lags + 1, len(mktrf)])
+    x_data = np.zeros([len(mktrf), no_lags + 1])
 
     for i in range(0, no_lags + 1):
-        x_data[i] = mktrf
+        x_data[:,i] = mktrf
 
     # Prepare DataLoader and Trainer
     loader = DataLoader(connect=True)
@@ -33,12 +37,6 @@ def plot_cum_beta(freq="monthly"):
     trainer = Trainer()
 
     print("")
-
-    # Portfolio list
-    portfolio_list = ['small', 'large', 'growth', 'value', 'smb', 'hml']
-
-    if freq == 'monthly':
-        portfolio_list.extend(['small_growth', 'small_value', 'large_growth', 'large_value'])
 
     # Iterate for portfolios
     for portfolio in portfolio_list:
@@ -51,7 +49,7 @@ def plot_cum_beta(freq="monthly"):
 
         trainer.load_parameters(param)
 
-        [_, beta] = trainer.derive_expret_beta(x_data.T)
+        [_, beta] = trainer.derive_expret_beta(x_data)
 
         output_beta = np.zeros([len(mktrf), no_lags + 1])
 
@@ -71,6 +69,6 @@ def plot_cum_beta(freq="monthly"):
     loader.close()
 
 if __name__ == "__main__":
-    plot_cum_beta("daily")
+    # plot_cum_beta("daily")
     plot_cum_beta("monthly")
 

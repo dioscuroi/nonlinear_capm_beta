@@ -1,5 +1,6 @@
 __pycache__
 .idea
 sql_query/*.spf
+sql_query/database_backup
 
 config.py
