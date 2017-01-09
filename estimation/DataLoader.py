@@ -173,6 +173,26 @@ class DataLoader:
         else:
             return None
 
+    def load_permno_list_with_parameters(self, year, max_rank):
+        """load_permno_list_with_parameters
+        """
+
+        query = """
+            select permno
+            from beta_parameters_stocks
+            where year = {} and rank <= {} and parameters is not null
+            order by rank
+        """.format(year, max_rank)
+
+        with self.connection.cursor() as cur:
+            cur.execute(query)
+            results = cur.fetchall()
+
+        if len(results) > 0:
+            return pd.DataFrame(results)
+        else:
+            return None
+
     def check_if_still_empty(self, year, permno):
         """check_if_still_empty
         """
@@ -239,6 +259,30 @@ class DataLoader:
             cur.execute(query)
             self.connection.commit()
 
+    def load_stock_params(self, year, permno):
+        """load_stock_params
+        """
+
+        query = """
+          select parameters
+          from beta_parameters_stocks
+          where year = {} and permno = {}
+        """.format(year, permno)
+
+        with self.connection.cursor() as cur:
+            cur.execute(query)
+            result = cur.fetchall()
+
+            if len(result) < 1:
+                return None
+
+            params = result[0]['parameters']
+
+            if params is not None:
+                return json.loads(params)
+            else:
+                return None
+
     def move_portfolio_params_to_the_repeated(self, freq, name, id):
         """move_portfolio_params_to_the_repeated
         """
@@ -273,4 +317,16 @@ class DataLoader:
 
             self.connection.commit()
 
+    def save_beta_stats(self, year, permno, beta_average, beta_delay, beta_convexity):
+        """save_beta_stats
+        """
 
+        query = """
+            update beta_parameters_stocks
+            set beta_average = {}, beta_delay = {}, beta_convexity = {}
+            where year = {} and permno = {}
+        """.format(beta_average, beta_delay, beta_convexity, year, permno)
+
+        with self.connection.cursor() as cur:
+            cur.execute(query)
+            self.connection.commit()
