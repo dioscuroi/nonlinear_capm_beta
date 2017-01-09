@@ -16,7 +16,7 @@ def repeat_specific_portfolio(freq="monthly", portfolio='small-growth'):
 
     loader = DataLoader(connect=True)
 
-    no_repeats = 10
+    no_repeats = 100
 
     for repeat_id in range(0, no_repeats):
 
@@ -34,7 +34,6 @@ def repeat_specific_portfolio(freq="monthly", portfolio='small-growth'):
         shutil.move(source, dest)
 
         loader.move_portfolio_params_to_the_repeated(freq, portfolio, repeat_id)
-
 
     loader.close()
 
