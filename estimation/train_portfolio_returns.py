@@ -6,7 +6,7 @@ from Trainer import Trainer
 from DataLoader import DataLoader
 
 
-def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name = None):
+def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name=None):
 
     print("***********************************")
     print(" Train Portfolio Returns")
@@ -31,7 +31,7 @@ def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name = N
         portfolio_list = ['small', 'large', 'growth', 'value', 'smb', 'hml']
 
         if freq == 'monthly':
-            portfolio_list.extend(['small_growth', 'small_value', 'large_growth', 'large_value'])
+            portfolio_list.extend(['small-growth', 'small-value', 'large-growth', 'large-value'])
 
     else:
         portfolio_list = [portfolio_name]

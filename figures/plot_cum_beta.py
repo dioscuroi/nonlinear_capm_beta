@@ -4,7 +4,7 @@ import numpy as np
 from nonlinear_capm_beta.estimation import *
 
 
-def plot_cum_beta(freq="monthly"):
+def plot_cum_beta(freq="monthly", portfolio=None):
     """plot_cum_beta
     """
 
@@ -24,6 +24,9 @@ def plot_cum_beta(freq="monthly"):
         no_lags = 20
         mktrf = np.arange(-3, 3 + 0.001, .1)
         portfolio_list = ['small', 'large', 'growth', 'value', 'smb', 'hml']
+
+    if portfolio is not None:
+        portfolio_list = [portfolio]
 
     # Beta plot is drawn on the basis that RmRf is a vector of equal values
     x_data = np.zeros([len(mktrf), no_lags + 1])

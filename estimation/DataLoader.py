@@ -79,10 +79,10 @@ class DataLoader:
             'value': 'select date, d10 from FamaFrench.portfolio_value',
             'smb': 'select date, smb from FamaFrench.3factors',
             'hml': 'select date, hml from FamaFrench.3factors',
-            'small_growth': 'select date, p11 from FamaFrench.portfolio_size_value',
-            'small_value': 'select date, p15 from FamaFrench.portfolio_size_value',
-            'large_growth': 'select date, p51 from FamaFrench.portfolio_size_value',
-            'large_value': 'select date, p55 from FamaFrench.portfolio_size_value'
+            'small-growth': 'select date, p11 from FamaFrench.portfolio_size_value',
+            'small-value': 'select date, p15 from FamaFrench.portfolio_size_value',
+            'large-growth': 'select date, p51 from FamaFrench.portfolio_size_value',
+            'large-value': 'select date, p55 from FamaFrench.portfolio_size_value'
         }
 
         query = switcher[name]
@@ -119,8 +119,13 @@ class DataLoader:
 
         assert len(result) <= 1
 
-        if len(result) == 1:
-            return json.loads(result[0]['parameters'])
+        if len(result) < 1:
+            return None
+
+        params = result[0]['parameters']
+
+        if params is not None:
+            return json.loads(params)
         else:
             return None
 
@@ -233,3 +238,39 @@ class DataLoader:
         with self.connection.cursor() as cur:
             cur.execute(query)
             self.connection.commit()
+
+    def move_portfolio_params_to_the_repeated(self, freq, name, id):
+        """move_portfolio_params_to_the_repeated
+        """
+
+        with self.connection.cursor() as cur:
+
+            query = """
+              select parameters
+              from beta_parameters_portfolios
+              where freq = '{}' and name = '{}'""".format(freq, name)
+
+            cur.execute(query)
+            result = cur.fetchall()
+
+            assert len(result) == 1
+
+            params = result[0]['parameters']
+
+            query = """
+              delete from beta_parameters_portfolios
+              where freq = '{}' and name = '{}'""".format(freq, name)
+
+            cur.execute(query)
+
+            query = """
+              insert into beta_parameters_portfolios_repeated
+              (freq, name, id, parameters)
+              value
+              ('{}', '{}', {}, '{}')""".format(freq, name, id, params)
+
+            cur.execute(query)
+
+            self.connection.commit()
+
+
