@@ -16,9 +16,9 @@ def plot_cum_beta(freq="monthly", portfolio=None):
 
     if freq == "monthly":
         no_lags = 1
-        mktrf = np.arange(-15, 15 + 0.001, .2)
-        # portfolio_list = ['small_growth', 'small_value', 'large_growth', 'large_value', 'smb', 'hml']
-        portfolio_list = ['small_growth', 'small_value', 'large_growth', 'large_value', 'smb', 'hml', 'small', 'large', 'growth', 'value']
+        mktrf = np.arange(-20, 20 + 0.001, .2)
+        # portfolio_list = ['small-growth', 'small-value', 'large-growth', 'large-value', 'smb', 'hml']
+        portfolio_list = ['small-growth', 'small-value', 'large-growth', 'large-value', 'smb', 'hml', 'small', 'large', 'growth', 'value']
 
     else:
         no_lags = 20

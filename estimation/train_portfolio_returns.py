@@ -6,7 +6,7 @@ from Trainer import Trainer
 from DataLoader import DataLoader
 
 
-def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name=None):
+def train_portfolio_returns(freq='monthly', portfolio_name=None, depth=2, width=1):
 
     print("***********************************")
     print(" Train Portfolio Returns")
@@ -16,15 +16,13 @@ def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name=Non
 
     if freq == 'daily':
         no_lags = 20
-        log_returns = False
     else:
         no_lags = 1
-        log_returns = True
 
     # Load market returns
     loader = DataLoader(connect=True)
 
-    mktrf = loader.load_market_returns(freq, no_lags=no_lags, log_returns=log_returns)
+    mktrf = loader.load_market_returns(freq, no_lags=no_lags)
 
     # now run the machine learning on portfolio returns
     if portfolio_name is None:
@@ -45,7 +43,7 @@ def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name=Non
         print(" ")
 
         # Load portfolio returns
-        pf_returns = loader.load_portfolio_returns(freq, portfolio, log_returns=log_returns)
+        pf_returns = loader.load_portfolio_returns(freq, portfolio)
 
         merged = pd.merge(mktrf, pf_returns, on='date')
 
@@ -80,20 +78,7 @@ def train_portfolio_returns(freq='monthly', depth=2, width=1, portfolio_name=Non
 
 # call the main function when called directly
 if __name__ == "__main__":
-    if len(sys.argv) == 4:
-        freq = sys.argv[1]
-        depth = int(sys.argv[2])
-        width = int(sys.argv[3])
-        train_portfolio_returns(freq, depth, width)
 
-    elif len(sys.argv) == 5:
-        freq = sys.argv[1]
-        depth = int(sys.argv[2])
-        width = int(sys.argv[3])
-        portfolio_name = sys.argv[4]
-        train_portfolio_returns(freq, depth, width, portfolio_name)
-
-    else:
-        train_portfolio_returns()
+    train_portfolio_returns("monthly")
 
     print('** beep **\a')

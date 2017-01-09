@@ -8,7 +8,7 @@ def plot_expret_beta(freq="monthly"):
 
     if freq == "monthly":
         no_lags = 1
-        mktrf = np.arange(-15, 15 + 0.001, .2)
+        mktrf = np.arange(-20, 20 + 0.001, .2)
         portfolio_list = ['small', 'large', 'growth', 'value']
     else:
         no_lags = 20
