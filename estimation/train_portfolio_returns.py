@@ -4,6 +4,7 @@ import pandas as pd
 
 from Trainer import Trainer
 from DataLoader import DataLoader
+from nonlinear_capm_beta.figures.plot_cum_beta import plot_cum_beta
 
 
 def train_portfolio_returns(freq='monthly', portfolio_name=None, depth=2, width=1):
@@ -73,6 +74,8 @@ def train_portfolio_returns(freq='monthly', portfolio_name=None, depth=2, width=
 
         loader.save_portfolio_params(params, name=portfolio, freq=freq, lags=no_lags, depth=depth, width=width)
 
+        plot_cum_beta(freq, portfolio)
+
         del trainer
 
     loader.close()
@@ -83,6 +86,6 @@ def train_portfolio_returns(freq='monthly', portfolio_name=None, depth=2, width=
 # call the main function when called directly
 if __name__ == "__main__":
 
-    train_portfolio_returns("monthly")
+    train_portfolio_returns("daily")
 
     print('** beep **\a')

@@ -87,7 +87,7 @@ class DataLoader:
 
         query = switcher[name]
 
-        if query == 'daily':
+        if freq == 'daily':
             query += '_daily'
 
         with self.connection.cursor() as cur:

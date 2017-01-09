@@ -17,7 +17,6 @@ def train_stock_returns(year_from=1931, year_to=2016, max_rank=500):
     print(" max_rank: {}".format(max_rank))
     print("***********************************")
 
-    # Load market returns
     loader = DataLoader(connect=True)
 
     total_training_no = 0
