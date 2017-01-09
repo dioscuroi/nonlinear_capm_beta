@@ -38,6 +38,27 @@ class DataLoader:
     def close(self):
         self.connection.close()
 
+    def sql_query_select(self, query):
+        """sql_query_select
+        """
+
+        with self.connection.cursor() as cur:
+            cur.execute(query)
+            results = cur.fetchall()
+
+        if results is None:
+            return None
+
+        return pd.DataFrame(results)
+
+    def sql_query_commit(self, query):
+        """sql_query_commit
+        """
+
+        with self.connection.cursor() as cur:
+            cur.execute(query)
+            self.connection.commit()
+
     def load_market_returns(self, freq='daily', no_lags=20, date_from=None, date_to=None, log_returns=False):
         """load_market_returns
         """
@@ -50,10 +71,7 @@ class DataLoader:
         if (date_from is not None) & (date_to is not None):
             query += ' where date >= "{}" and date <= "{}"'.format(date_from, date_to)
 
-        with self.connection.cursor() as cur:
-            cur.execute(query)
-
-            df = pd.DataFrame(cur.fetchall())
+        df = self.sql_query_select(query)
 
         if log_returns:
             df['rm'] = df['mktrf'] + df['rf']
@@ -327,6 +345,5 @@ class DataLoader:
             where year = {} and permno = {}
         """.format(beta_average, beta_delay, beta_convexity, year, permno)
 
-        with self.connection.cursor() as cur:
-            cur.execute(query)
-            self.connection.commit()
+        self.sql_query_commit(query)
+
