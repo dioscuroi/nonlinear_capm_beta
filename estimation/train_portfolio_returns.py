@@ -47,7 +47,11 @@ def train_portfolio_returns(freq='monthly', portfolio_name=None, depth=2, width=
 
         merged = pd.merge(mktrf, pf_returns, on='date')
 
-        y_data = merged.loc[:,'pfret'] - merged.loc[:,'rf']
+        if (portfolio == 'smb') or (portfolio == 'hml'):
+            y_data = merged.loc[:, 'pfret']
+        else:
+            y_data = merged.loc[:,'pfret'] - merged.loc[:,'rf']
+
         y_data = y_data.as_matrix().reshape(-1, 1)
 
         x_data = merged.iloc[:,1:-1]

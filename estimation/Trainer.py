@@ -22,7 +22,7 @@ class Trainer:
         self.weight = []
         self.bias   = []
 
-        radius = 5
+        radius = 1
 
         if depth > 1:
             self.weight.append( np.random.rand(self.no_inputs, width) * (radius*2) - radius )

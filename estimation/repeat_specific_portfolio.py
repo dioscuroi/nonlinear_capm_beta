@@ -16,12 +16,12 @@ def repeat_specific_portfolio(freq="monthly", portfolio='small-growth'):
 
     loader = DataLoader(connect=True)
 
-    no_repeats = 100
+    no_repeats = 10
 
     for repeat_id in range(0, no_repeats):
 
         print("")
-        print("==== Repeat ID: {} ====".format(repeat_id))
+        print("==== Repeat ID: {}/{} ====".format(repeat_id, no_repeats))
         print("")
 
         train_portfolio_returns(freq, portfolio)
@@ -41,9 +41,11 @@ def repeat_specific_portfolio(freq="monthly", portfolio='small-growth'):
 
 # call the main function when called directly
 if __name__ == "__main__":
+    repeat_specific_portfolio("daily", "smb")
+    repeat_specific_portfolio("daily", "hml")
     # repeat_specific_portfolio("monthly", "small-growth")
     # repeat_specific_portfolio("monthly", "small-value")
     # repeat_specific_portfolio("monthly", "large-growth")
-    # repeat_specific_portfolio("monthly", "smb")
+    repeat_specific_portfolio("monthly", "smb")
+    repeat_specific_portfolio("monthly", "hml")
     # repeat_specific_portfolio("monthly", "small")
-    repeat_specific_portfolio("daily", "smb")
