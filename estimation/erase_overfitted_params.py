@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 
 from utils import *
@@ -52,4 +53,13 @@ def erase_overfitted_params(year_from=1931, year_to=2015):
 
 
 if __name__ == "__main__":
-    erase_overfitted_params(1931, 2015)
+
+    if len(sys.argv) == 3:
+        year_from = int(sys.argv[1])
+        year_to = int(sys.argv[2])
+
+    else:
+        year_from = 2003
+        year_to = 2015
+
+    erase_overfitted_params(year_from, year_to)

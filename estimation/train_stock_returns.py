@@ -9,7 +9,7 @@ from Trainer import Trainer
 from DataLoader import DataLoader
 
 
-def train_stock_returns(year_from=1931, year_to=2016, max_rank=500):
+def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
 
     print("***********************************")
     print(" Train Stock Returns")
@@ -30,7 +30,7 @@ def train_stock_returns(year_from=1931, year_to=2016, max_rank=500):
         print(" Year: {}".format(year))
         print("***********************************")
 
-        date_from = date(year-4, 1, 1)
+        date_from = date(year-9, 1, 1)
         date_to = date(year, 12, 31)
 
         print("Loading market returns...")
@@ -66,7 +66,7 @@ def train_stock_returns(year_from=1931, year_to=2016, max_rank=500):
 
             print("No of matched observations: {}".format(no_obs))
 
-            if no_obs < 1000:
+            if no_obs < 2000:
                 print("Skip this stock due to the lack of observations (obs:{})".format(no_obs))
                 loader.save_stock_params_only_no_obs(year, permno, no_obs)
 
@@ -129,7 +129,7 @@ if __name__ == "__main__":
         max_rank = int(sys.argv[3])
 
     else:
-        year_from = 1937
+        year_from = 1936
         year_to = 2015
         max_rank = 500
 
