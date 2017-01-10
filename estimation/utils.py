@@ -61,7 +61,7 @@ def check_if_overfitted_by_beta(beta):
 
     normalized = (beta20 - beta_average) / beta_stdev
 
-    if np.any(np.abs(normalized) > 3):
+    if np.any(np.abs(normalized) > 4):
         return True
 
     return False

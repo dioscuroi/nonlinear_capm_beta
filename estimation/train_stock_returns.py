@@ -4,6 +4,7 @@ import pandas as pd
 
 from datetime import date, datetime
 
+from utils import check_if_overfitted_by_param
 from Trainer import Trainer
 from DataLoader import DataLoader
 
@@ -79,21 +80,32 @@ def train_stock_returns(year_from=1931, year_to=2016, max_rank=500):
             x_data = x_data.as_matrix()
 
             # Initialize the trainer
-            # try:
-            trainer = Trainer(depth=2, width=1, no_inputs=21, zero_init=True)
+            max_retries = 3
 
-            trainer.run_ols_regression(x_data, y_data)
+            for attempt_id in range(max_retries):
 
-            # launch the learning
-            params = trainer.train(x_data, y_data)
+                trainer = Trainer(depth=2, width=1, no_inputs=21, zero_init=False)
 
-            loader.save_stock_params(year, permno, no_obs, date_from, date_to, params)
+                trainer.run_ols_regression(x_data, y_data)
 
-            del trainer
+                params = trainer.train(x_data, y_data)
 
-            # except:
-            #     print("Unexpected error: ", sys.exc_info()[0])
-            #     print("Skip this permno and move on to the next one")
+                del trainer
+
+                if not check_if_overfitted_by_param(params):
+                    break
+
+                print("Parameters are overfitted. Let's try again.")
+                print("")
+
+            if check_if_overfitted_by_param(params):
+                print("Parameters are still overfitted after {} retries. Give up this observation.".format(max_retries))
+                print("")
+
+                loader.save_stock_params_only_no_obs(year, permno, no_obs)
+
+            else:
+                loader.save_stock_params(year, permno, no_obs, date_from, date_to, params)
 
             elapsed = time.time() - t_start
 

@@ -11,7 +11,7 @@ def erase_overfitted_params(year_from=1931, year_to=2015):
     # initialize parameters and variables
     loader = DataLoader(connect=True)
 
-    for year in range(year_from, year_to):
+    for year in range(year_from, year_to+1):
 
         print("")
         print("***********************************")
