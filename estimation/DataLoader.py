@@ -73,7 +73,7 @@ class DataLoader:
         """load_market_returns
         """
 
-        query = 'select date, mktrf, rf from FamaFrench.3factors'
+        query = 'select date, mktrf, rf from FamaFrench_3factors'
 
         if freq == 'daily':
             query += '_daily'
@@ -101,16 +101,16 @@ class DataLoader:
         """
 
         switcher = {
-            'small': 'select date, d1 from FamaFrench.portfolio_size',
-            'large': 'select date, d10 from FamaFrench.portfolio_size',
-            'growth': 'select date, d1 from FamaFrench.portfolio_value',
-            'value': 'select date, d10 from FamaFrench.portfolio_value',
-            'smb': 'select date, smb from FamaFrench.3factors',
-            'hml': 'select date, hml from FamaFrench.3factors',
-            'small-growth': 'select date, p11 from FamaFrench.portfolio_size_value',
-            'small-value': 'select date, p15 from FamaFrench.portfolio_size_value',
-            'large-growth': 'select date, p51 from FamaFrench.portfolio_size_value',
-            'large-value': 'select date, p55 from FamaFrench.portfolio_size_value'
+            'small': 'select date, d1 from FamaFrench_portfolio_size',
+            'large': 'select date, d10 from FamaFrench_portfolio_size',
+            'growth': 'select date, d1 from FamaFrench_portfolio_value',
+            'value': 'select date, d10 from FamaFrench_portfolio_value',
+            'smb': 'select date, smb from FamaFrench_3factors',
+            'hml': 'select date, hml from FamaFrench_3factors',
+            'small-growth': 'select date, p11 from FamaFrench_portfolio_size_value',
+            'small-value': 'select date, p15 from FamaFrench_portfolio_size_value',
+            'large-growth': 'select date, p51 from FamaFrench_portfolio_size_value',
+            'large-value': 'select date, p55 from FamaFrench_portfolio_size_value'
         }
 
         query = switcher[name]
@@ -243,7 +243,7 @@ class DataLoader:
 
         query = """
             select date, ret
-            from CRSP.stocks_daily
+            from CRSP_stocks_daily
             where permno = {} and date >= '{}' and date <= '{}'
         """.format(permno, date_from, date_to)
 
