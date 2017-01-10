@@ -3,7 +3,14 @@ import pandas as pd
 import json
 import pymysql
 
+from collections import OrderedDict
+from pymysql.cursors import DictCursorMixin, Cursor
+
 import nonlinear_capm_beta.config as config
+
+
+class OrderedDictCursor(DictCursorMixin, Cursor):
+    dict_type = OrderedDict
 
 
 class DataLoader:
@@ -42,7 +49,7 @@ class DataLoader:
         """sql_query_select
         """
 
-        with self.connection.cursor() as cur:
+        with self.connection.cursor(OrderedDictCursor) as cur:
             cur.execute(query)
             results = cur.fetchall()
 
