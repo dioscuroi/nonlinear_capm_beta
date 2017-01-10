@@ -1,10 +1,9 @@
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
 
-from Trainer import Trainer
-from DataLoader import DataLoader
 from utils import *
+from DataLoader import DataLoader
+
 
 def compute_stock_beta(year_from=1931, year_to=2015):
     """compute_stock_beta
@@ -13,7 +12,7 @@ def compute_stock_beta(year_from=1931, year_to=2015):
     # initialize parameters and variables
     loader = DataLoader(connect=True)
 
-    for year in range(1931, 2016):
+    for year in range(year_from, year_to):
 
         print("")
         print("***********************************")
