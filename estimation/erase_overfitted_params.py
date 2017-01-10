@@ -25,13 +25,6 @@ def erase_overfitted_params(year_from=1931, year_to=2015):
 
         for permno in permno_list['permno']:
 
-            print('.', end="", flush=True)
-
-            count += 1
-
-            if np.mod(count, 50) == 0:
-                print('')
-
             param = loader.load_stock_params(year, permno)
 
             if check_if_overfitted_by_param(param):
@@ -43,10 +36,20 @@ def erase_overfitted_params(year_from=1931, year_to=2015):
 
                 loader.sql_query_commit(query)
 
+                print('*', end="", flush=True)
+
+            else:
+                print('.', end="", flush=True)
+
+            count += 1
+
+            if np.mod(count, 50) == 0:
+                print('')
+
         print("")
 
     loader.close()
 
 
 if __name__ == "__main__":
-    erase_overfitted_params(1931, 1940)
+    erase_overfitted_params(1931, 2015)
