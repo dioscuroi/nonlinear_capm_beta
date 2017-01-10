@@ -88,7 +88,7 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
 
                 trainer.run_ols_regression(x_data, y_data)
 
-                params = trainer.train(x_data, y_data)
+                params = trainer.train(x_data, y_data, x_tolerance = 1e-2, cost_tolerance=1e-2)
 
                 del trainer
 
@@ -105,6 +105,9 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
                 loader.save_stock_params_only_no_obs(year, permno, no_obs)
 
             else:
+                print("** Parameters are well estiamted!! Hooray!! **".format(max_retries))
+                print("")
+
                 loader.save_stock_params(year, permno, no_obs, date_from, date_to, params)
 
             elapsed = time.time() - t_start
