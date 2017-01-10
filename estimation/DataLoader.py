@@ -56,6 +56,9 @@ class DataLoader:
         if results is None:
             return None
 
+        if len(results) == 0:
+            return None
+
         return pd.DataFrame(results)
 
     def sql_query_commit(self, query):
