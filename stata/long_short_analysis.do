@@ -122,26 +122,21 @@ foreach beta in beta_average beta_delay beta_convexity {
 		gen exret2 = `weight'r_`beta'2 * 100 - rf
 		gen exret3 = `weight'r_`beta'3 * 100 - rf
 
-		reg exret1 mktrf
-		outreg2 using "long_short_analysis_`beta'_`weight'_CAPM.txt", `option'
-		
-		reg exret2 mktrf
-		outreg2 using "long_short_analysis_`beta'_`weight'_CAPM.txt", `option'
-		
-		reg exret3 mktrf
-		outreg2 using "long_short_analysis_`beta'_`weight'_CAPM.txt", `option'
-
-		reg exret1 mktrf smb hml
-		outreg2 using "long_short_analysis_`beta'_`weight'_FF3.txt", `option'
-
-		reg exret2 mktrf smb hml
-		outreg2 using "long_short_analysis_`beta'_`weight'_FF3.txt", `option'
-
-		reg exret3 mktrf smb hml
-		outreg2 using "long_short_analysis_`beta'_`weight'_FF3.txt", `option'
-		
+		forvalues i = 1/3 {
+			reg exret`i' mktrf
+			outreg2 using "long_short_analysis_`beta'_`weight'_CAPM.txt", `option'
+			
+			reg exret`i' mktrf smb hml
+			outreg2 using "long_short_analysis_`beta'_`weight'_FF3.txt", `option'
+			
+			reg exret`i' mktrf if date >= ym(1950,1)
+			outreg2 using "long_short_analysis_`beta'_`weight'_CAPM_since_1950.txt", `option'
+			
+			reg exret`i' mktrf smb hml if date >= ym(1950,1)
+			outreg2 using "long_short_analysis_`beta'_`weight'_FF3_since_1950.txt", `option'
+		}
+	
 		drop exret1 exret2 exret3
-
 	}
 }
 
