@@ -18,6 +18,8 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
     print(" max_rank: {}".format(max_rank))
     print("***********************************")
 
+    no_lags = 10
+
     loader = DataLoader(connect=True)
 
     total_training_no = 0
@@ -34,7 +36,7 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
         date_to = date(year, 12, 31)
 
         print("Loading market returns...")
-        mktrf = loader.load_market_returns('daily', date_from=date_from, date_to=date_to)
+        mktrf = loader.load_market_returns('daily', no_lags=10, date_from=date_from, date_to=date_to)
 
         permno_list = loader.load_target_permno_list(year, max_rank)
 
@@ -84,21 +86,21 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
 
             for attempt_id in range(max_retries):
 
-                trainer = Trainer(depth=2, width=1, no_inputs=21, zero_init=False)
+                trainer = Trainer(depth=2, width=1, no_inputs=no_lags+1, zero_init=False)
 
                 trainer.run_ols_regression(x_data, y_data)
 
-                params = trainer.train(x_data, y_data, x_tolerance = 1e-2, cost_tolerance=1e-2)
+                params = trainer.train(x_data, y_data, x_tolerance=1e-2, cost_tolerance=1e-3)
 
                 del trainer
 
-                if not check_if_overfitted_by_param(params):
+                if not check_if_overfitted_by_param(params, freq="daily", no_lags=no_lags):
                     break
 
                 print("Parameters are overfitted. Let's try again.")
                 print("")
 
-            if check_if_overfitted_by_param(params):
+            if check_if_overfitted_by_param(params, freq="daily", no_lags=no_lags):
                 print("Parameters are still overfitted after {} retries. Give up this observation.".format(max_retries))
                 print("")
 

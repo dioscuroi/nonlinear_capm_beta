@@ -10,7 +10,6 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 !rm long_short_analysis*.txt
 
 
-/*
 * load beta statistics
 insheet using "beta_stats.csv", clear
 
@@ -27,7 +26,7 @@ foreach beta of varlist beta_average beta_delay beta_convexity {
 summarize beta_*, detail
 
 * form portfolios
-foreach beta of varlist beta_average beta_delay {
+foreach beta of varlist beta_average beta_delay beta_convexity {
 
 	bysort year: egen p33 = pctile(`beta'), p(33)
 	bysort year: egen p67 = pctile(`beta'), p(67)
@@ -40,10 +39,10 @@ foreach beta of varlist beta_average beta_delay {
 	drop p33 p67
 }
 
-gen pid_beta_convexity = .
-replace pid_beta_convexity = 1 if beta_convexity < 0
-replace pid_beta_convexity = 2 if beta_convexity == 0
-replace pid_beta_convexity = 3 if beta_convexity > 0
+*gen pid_beta_convexity = .
+*replace pid_beta_convexity = 1 if beta_convexity < 0
+*replace pid_beta_convexity = 2 if beta_convexity == 0
+*replace pid_beta_convexity = 3 if beta_convexity > 0
 
 
 * merge with stock returns
@@ -72,10 +71,8 @@ drop if pid_beta_average == .
 drop month
 
 save temp_portfolio_formation, replace
-*/
 
 
-/*
 * compute portfolio returns
 foreach beta in beta_average beta_delay beta_convexity {
 
@@ -110,7 +107,6 @@ merge 1:1 date using temp_portfolio_returns_beta_delay, nogen
 merge 1:1 date using temp_portfolio_returns_beta_convexity, nogen
 
 save temp_portfolio_returns_combined, replace
-*/
 
 
 * print regression results

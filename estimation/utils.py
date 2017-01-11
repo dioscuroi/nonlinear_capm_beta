@@ -3,17 +3,15 @@ import numpy as np
 from Trainer import Trainer
 
 
-def compute_beta(param, freq='daily'):
+def compute_beta(param, freq, no_lags):
     """compute_beta
     """
 
     # Prepare market excess returns as inputs
     if freq == 'daily':
-        no_lags = 20
         mktrf = np.arange(-3, 3 + 0.001, .1)
 
     elif freq == 'monthly':
-        no_lags = 1
         mktrf = np.arange(-20, 20 + 0.001, .2)
 
     x_data = np.zeros([len(mktrf), no_lags + 1])
@@ -31,11 +29,11 @@ def compute_beta(param, freq='daily'):
     return beta[0]
 
 
-def check_if_overfitted_by_param(param, freq='daily'):
+def check_if_overfitted_by_param(param, freq, no_lags):
     """check_if_overfitted_by_param
     """
 
-    beta = compute_beta(param, freq)
+    beta = compute_beta(param, freq, no_lags)
 
     return check_if_overfitted_by_beta(beta)
 
