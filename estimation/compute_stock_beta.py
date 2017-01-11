@@ -24,6 +24,9 @@ def compute_stock_beta(year_from=1931, year_to=2015):
 
         permno_list = loader.load_permno_list_with_parameters(year, max_rank=500)
 
+        if permno_list is None:
+            continue
+
         for permno in permno_list['permno']:
 
             print('.', end="", flush=True)
