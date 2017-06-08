@@ -6,3 +6,4 @@ sql_query/database_backup
 config.py
 
 estimation/~$*.xlsx
+estimation/*.log
