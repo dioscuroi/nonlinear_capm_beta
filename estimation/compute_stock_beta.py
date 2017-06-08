@@ -38,7 +38,7 @@ def compute_stock_beta(year_from=1931, year_to=2015):
 
             param = loader.load_stock_params(year, permno)
 
-            beta = compute_beta(param)
+            beta = compute_beta(param=param, freq='daily', no_lags=10)
 
             if check_if_overfitted_by_beta(beta):
                 continue
@@ -63,4 +63,15 @@ def compute_stock_beta(year_from=1931, year_to=2015):
 
 
 if __name__ == "__main__":
-    compute_stock_beta(1931, 2015)
+
+    if len(sys.argv) == 3:
+        year_from = int(sys.argv[1])
+        year_to = int(sys.argv[2])
+
+    else:
+        year_from = 1936
+        year_to = 2015
+
+    compute_stock_beta(year_from, year_to)
+
+    print('** beep **\a')

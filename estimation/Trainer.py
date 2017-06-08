@@ -2,7 +2,7 @@ import os
 import datetime
 import numpy as np
 import tensorflow as tf
-\
+
 class Trainer:
     """A simple class to run machine learning"""
 
