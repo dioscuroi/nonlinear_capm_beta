@@ -18,7 +18,7 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
     print(" max_rank: {}".format(max_rank))
     print("***********************************")
 
-    no_lags = 10
+    no_lags = 5
 
     loader = DataLoader(connect=True)
 
@@ -36,7 +36,7 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
         date_to = date(year, 12, 31)
 
         print("Loading market returns...")
-        mktrf = loader.load_market_returns('daily', no_lags=10, date_from=date_from, date_to=date_to)
+        mktrf = loader.load_market_returns('daily', no_lags=no_lags, date_from=date_from, date_to=date_to)
 
         permno_list = loader.load_target_permno_list(year, max_rank)
 

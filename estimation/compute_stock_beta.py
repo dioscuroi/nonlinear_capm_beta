@@ -38,7 +38,7 @@ def compute_stock_beta(year_from=1931, year_to=2015):
 
             param = loader.load_stock_params(year, permno)
 
-            beta = compute_beta(param=param, freq='daily', no_lags=10)
+            beta = compute_beta(param=param, freq='daily', no_lags=5)
 
             if check_if_overfitted_by_beta(beta):
                 continue
