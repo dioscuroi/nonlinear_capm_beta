@@ -18,9 +18,13 @@ foreach beta of varlist beta_average beta_delay beta_convexity {
 	
 	_pctile `beta', p(1 99)
 	
-	drop if `beta' < r(r1)
-	drop if `beta' > r(r2)
+	replace `beta' = . if `beta' < r(r1)
+	replace `beta' = . if `beta' > r(r2)
 }
+
+drop if beta_average == .
+drop if beta_delay == .
+drop if beta_convexity == .
 
 * print the summary of beta
 summarize beta_*, detail
@@ -38,11 +42,6 @@ foreach beta of varlist beta_average beta_delay beta_convexity {
 	
 	drop p33 p67
 }
-
-*gen pid_beta_convexity = .
-*replace pid_beta_convexity = 1 if beta_convexity < 0
-*replace pid_beta_convexity = 2 if beta_convexity == 0
-*replace pid_beta_convexity = 3 if beta_convexity > 0
 
 
 * merge with stock returns
