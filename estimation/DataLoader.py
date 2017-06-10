@@ -257,15 +257,21 @@ class DataLoader:
 
         return results[0]['parameters'] is None
 
-    def load_stock_returns(self, permno, date_from, date_to):
+    def load_stock_returns(self, permno, date_from=None, date_to=None):
         """load_stock_returns
         """
 
         query = """
             select date, ret
             from CRSP_stocks_daily
-            where permno = {} and date >= '{}' and date <= '{}'
-        """.format(permno, date_from, date_to)
+            where permno = {} and ret is not null
+        """.format(permno).strip()
+
+        if date_from is not None:
+            query = query + " and date >= {}".format(date_from)
+
+        if date_to is not None:
+            query = query + " and date <= {}".format(date_to)
 
         with self.connection.cursor() as cur:
             cur.execute(query)

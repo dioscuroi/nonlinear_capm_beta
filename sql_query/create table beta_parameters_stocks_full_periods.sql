@@ -8,7 +8,7 @@ group by permno
 
 alter table beta_parameters_stocks_full_periods
 add primary key (permno),
-add estimated datetime,
+add touched datetime,
 add parameters text,
 add beta_average float,
 add beta_delay float,
@@ -19,3 +19,8 @@ add beta_convexity float
 select count(permno), min(permno), max(permno)
 from beta_parameters_stocks_full_periods
 ;
+
+
+select *
+from beta_parameters_stocks_full_periods
+where obs < 250;
