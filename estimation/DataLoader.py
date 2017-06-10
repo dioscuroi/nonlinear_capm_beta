@@ -282,23 +282,6 @@ class DataLoader:
         else:
             return None
 
-    def save_stock_params(self, year, permno, no_obs, date_from, date_to, params):
-        """save_stock_params
-        """
-
-        query = """
-          update beta_parameters_stocks
-          set no_obs = {},
-            sample_from = '{}',
-            sample_to = '{}',
-            parameters = '{}'
-          where year = {} and permno = {}
-        """.format(no_obs, date_from, date_to, json.dumps(params), year, permno)
-
-        with self.connection.cursor() as cur:
-            cur.execute(query)
-            self.connection.commit()
-
     def save_stock_params_only_no_obs(self, year, permno, no_obs):
         """save_stock_params_only_no_obs
         """

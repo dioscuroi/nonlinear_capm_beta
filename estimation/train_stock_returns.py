@@ -103,17 +103,40 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
                 print("Parameters are overfitted. Let's try again.")
                 print("")
 
-            if check_if_overfitted_by_param(params, freq="daily", no_lags=no_lags):
+            # compute beta
+            beta = compute_beta(param=params, freq='daily', no_lags=no_lags)
+
+            if check_if_overfitted_by_beta(beta):
                 print("Parameters are still overfitted after {} retries. Give up this observation.".format(max_retries))
                 print("")
 
                 loader.save_stock_params_only_no_obs(year, permno, no_obs)
+                continue
 
-            else:
-                print("** Parameters are well estiamted!! Hooray!! **".format(max_retries))
-                print("")
+            print("** Parameters are well estiamted!! Hooray!! **".format(max_retries))
+            print("")
 
-                loader.save_stock_params(year, permno, no_obs, date_from, date_to, params)
+            beta0 = beta[:, 0]
+            beta20 = np.sum(beta, axis=1)
+
+            beta_average = np.mean(beta20)
+            beta_delay = np.mean(beta20) - np.mean(beta0)
+            beta_convexity = (beta20[0] + beta20[-1]) / 2 - beta20[int((len(beta20) - 1) / 2)]
+
+            query = """
+              update beta_parameters_stocks
+              set no_obs = {},
+                sample_from = '{}',
+                sample_to = '{}',
+                parameters = '{}',
+                beta_average = {},
+                beta_delay = {},
+                beta_convexity = {}
+              where year = {} and permno = {}
+            """.format(no_obs, date_from, date_to, json.dumps(params), year, permno,
+                       beta_average, beta_delay, beta_convexity)
+
+            loader.sql_query_commit(query)
 
             elapsed = time.time() - t_start
 
