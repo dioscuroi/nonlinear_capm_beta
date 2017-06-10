@@ -16,7 +16,7 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 ****************************************************
 
 * load beta statistics
-insheet using "beta_stats_lag5.csv", clear
+insheet using "beta_stats.csv", clear
 
 * drop outliers
 foreach beta of varlist beta_average beta_delay beta_convexity {

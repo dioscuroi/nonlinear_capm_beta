@@ -115,7 +115,8 @@ merge 1:1 date using "/Users/dioscuroi/Research Data/Stocks/Fama_French/ff3facto
 
 foreach beta in beta_average beta_delay beta_convexity {
 
-	foreach weight in ew vw {
+*	foreach weight in ew vw {
+	foreach weight in vw {
 	
 		gen exret1 = `weight'r_`beta'1 * 100 - rf
 		gen exret2 = `weight'r_`beta'2 * 100 - rf
