@@ -221,6 +221,26 @@ class DataLoader:
         else:
             return None
 
+    def load_permno_list_with_parameters_but_no_beta(self, year):
+        """load_permno_list_with_parameters_but_no_beta
+        """
+
+        query = """
+            select permno
+            from beta_parameters_stocks
+            where year = {} and parameters is not null and beta_average is null
+            order by rank
+        """.format(year)
+
+        with self.connection.cursor() as cur:
+            cur.execute(query)
+            results = cur.fetchall()
+
+        if len(results) > 0:
+            return pd.DataFrame(results)
+        else:
+            return None
+
     def check_if_still_empty(self, year, permno):
         """check_if_still_empty
         """
