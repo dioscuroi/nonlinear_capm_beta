@@ -83,10 +83,11 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
 
             # Initialize the trainer
             max_retries = 3
+            zero_init = True
 
             for attempt_id in range(max_retries):
 
-                trainer = Trainer(depth=2, width=1, no_inputs=no_lags+1, zero_init=False)
+                trainer = Trainer(depth=2, width=1, no_inputs=no_lags+1, zero_init=zero_init)
 
                 trainer.run_ols_regression(x_data, y_data)
 
@@ -96,6 +97,8 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
 
                 if not check_if_overfitted_by_param(params, freq="daily", no_lags=no_lags):
                     break
+
+                zero_init = False
 
                 print("Parameters are overfitted. Let's try again.")
                 print("")
