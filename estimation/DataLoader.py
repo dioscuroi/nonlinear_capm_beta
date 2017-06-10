@@ -268,10 +268,10 @@ class DataLoader:
         """.format(permno).strip()
 
         if date_from is not None:
-            query = query + " and date >= {}".format(date_from)
+            query = query + " and date >= '{}'".format(date_from)
 
         if date_to is not None:
-            query = query + " and date <= {}".format(date_to)
+            query = query + " and date <= '{}'".format(date_to)
 
         with self.connection.cursor() as cur:
             cur.execute(query)
