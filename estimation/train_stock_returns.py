@@ -63,6 +63,10 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
             print("Loading stock returns...")
             stock_rets = loader.load_stock_returns(permno, date_from, date_to)
 
+            if stock_rets is None:
+                loader.save_stock_params_only_no_obs(year, permno, 0)
+                continue
+
             merged = pd.merge(mktrf, stock_rets, on='date')
 
             no_obs = len(merged)
