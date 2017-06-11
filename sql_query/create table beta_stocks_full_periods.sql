@@ -1,7 +1,7 @@
 drop table if exists beta_stocks_full_periods;
 
 create table beta_stocks_full_periods as
-select permno, count(ret) as obs, min(date) as sample_from, max(date) as sample_to
+select permno, count(ret) as no_obs, min(date) as sample_from, max(date) as sample_to
 from CRSP_stocks_daily
 group by permno
 ;
@@ -15,6 +15,9 @@ add beta_delay float,
 add beta_convexity float
 ;
 
+delete from beta_stocks_full_periods
+where no_obs < 100
+;
 
 select count(permno), min(permno), max(permno)
 from beta_stocks_full_periods

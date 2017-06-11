@@ -12,13 +12,14 @@ from DataLoader import DataLoader
 
 def train_stock_returns_full_periods(permno_from, permno_to):
 
+    no_lags = 10
+
     print("***********************************")
     print(" Train Stock Returns")
     print(" permno_from: {}".format(permno_from))
     print(" permno_to  : {}".format(permno_to))
+    print(" no_lags    : {}".format(no_lags))
     print("***********************************")
-
-    no_lags = 10
 
     loader = DataLoader(connect=True)
 
@@ -30,7 +31,7 @@ def train_stock_returns_full_periods(permno_from, permno_to):
 
     print("Loading untouched firm list...")
     query = """
-        select permno, obs
+        select permno, no_obs
         from beta_stocks_full_periods
         where permno >= {} and permno <= {} and touched is null
         order by permno
@@ -92,22 +93,22 @@ def train_stock_returns_full_periods(permno_from, permno_to):
             if not check_if_overfitted_by_param(params, freq="daily", no_lags=no_lags):
                 break
 
+            params = None
             zero_init = False
 
             print("Parameters are overfitted. Let's try again.")
             print("")
 
+        # if parameters are still overfitted, replace parameters with OLS coefficients
+        if params is None:
+            trainer = Trainer(depth=2, width=1, no_inputs=no_lags + 1, zero_init=True)
+            trainer.run_ols_regression(x_data, y_data)
+            params = trainer.flush_params_to_dict()
+
         # compute beta
         beta = compute_beta(param=params, freq='daily', no_lags=no_lags)
 
-        if check_if_overfitted_by_beta(beta):
-            print("Parameters are still overfitted after {} retries. Give up this observation.".format(max_retries))
-
-            # mark the permno as touched
-            query = "update beta_stocks_full_periods set touched = now() where permno = {}".format(permno)
-            loader.sql_query_commit(query)
-
-            continue
+        assert (not check_if_overfitted_by_beta(beta))
 
         beta0 = beta[:, 0]
         beta20 = np.sum(beta, axis=1)
@@ -128,19 +129,20 @@ def train_stock_returns_full_periods(permno_from, permno_to):
 
         loader.sql_query_commit(query)
 
-        print("** Parameters are well estiamted!! Hooray!! **")
-        print("")
-
         elapsed = time.time() - t_start
-        print("Elapsed time: {:.3f} seconds".format(elapsed))
 
         total_training_no += 1
         total_training_time += elapsed
 
-    print("")
-    print("Total training no: {}".format(total_training_no))
-    print("Total training time: {:.2f} minutes ({:.2f} hours)".format(total_training_time/60, total_training_time/3600))
-    print("Average training time: {:.3f} seconds".format(total_training_time / total_training_no))
+        print("Results:")
+        print(" - permno: {}, no_obs:{}".format(permno, no_obs))
+        print(" - beta_average: {:.3f}, beta_delay: {:.3f}, beta_convexity: {:.3f}".format(beta_average, beta_delay, beta_convexity))
+        print("")
+        print("Elapsed time: {:.3f} seconds".format(elapsed))
+        print("")
+        print("Total training no: {}".format(total_training_no))
+        print("Total training time: {:.2f} minutes ({:.2f} hours)".format(total_training_time/60, total_training_time/3600))
+        print("Average training time: {:.3f} seconds".format(total_training_time / total_training_no))
 
     loader.close()
 
