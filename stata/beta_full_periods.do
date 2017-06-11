@@ -16,13 +16,13 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 * Prepare data
 ****************************************************
 
-use average_returns_of_every_stock, clear
+use beta_stats_full, clear
 
 * merge with beta stats
-merge 1:1 permno using beta_stats_full, keep(matched) nogen
+merge 1:1 permno using average_returns_of_every_stock, keep(matched) nogen
 
 * need to choose optimal filtering conditions here
-*drop if no_obs < 100
+drop if no_obs < 500
 
 * drop outliers
 foreach beta of varlist beta_average beta_delay beta_convexity {
@@ -47,4 +47,9 @@ corr beta_*
 reg avg_ret beta_*
 reg avg_capm_alpha beta_*
 reg avg_ff3_alpha beta_*
+
+reg avg_capm_alpha beta_average
+reg avg_capm_alpha beta_delay
+reg avg_capm_alpha beta_average beta_delay
+reg avg_capm_alpha beta_average beta_delay beta_convexity
 

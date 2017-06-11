@@ -18,7 +18,7 @@ def train_stock_returns_full_periods(permno_from, permno_to):
     print(" permno_to  : {}".format(permno_to))
     print("***********************************")
 
-    no_lags = 5
+    no_lags = 10
 
     loader = DataLoader(connect=True)
 
@@ -31,7 +31,7 @@ def train_stock_returns_full_periods(permno_from, permno_to):
     print("Loading untouched firm list...")
     query = """
         select permno, obs
-        from beta_parameters_stocks_full_periods
+        from beta_stocks_full_periods
         where permno >= {} and permno <= {} and touched is null
         order by permno
     """.format(permno_from, permno_to)
@@ -49,7 +49,7 @@ def train_stock_returns_full_periods(permno_from, permno_to):
         print(" ")
         print("*****************************************")
         print(datetime.today())
-        print(" permno: {} ({}/{})".format(permno, i+1, len(permno_list)))
+        print("permno: {} ({}/{})".format(permno, i+1, len(permno_list)))
         print("*****************************************")
 
         t_start = time.time()
@@ -61,6 +61,8 @@ def train_stock_returns_full_periods(permno_from, permno_to):
         merged = pd.merge(mktrf, stock_rets, on='date')
 
         no_obs = len(merged)
+
+        print("# observations: {}".format(no_obs))
 
         if no_obs < 100:
             print("Skip this stock due to the lack of observations (obs:{})".format(no_obs))
@@ -102,7 +104,7 @@ def train_stock_returns_full_periods(permno_from, permno_to):
             print("Parameters are still overfitted after {} retries. Give up this observation.".format(max_retries))
 
             # mark the permno as touched
-            query = "update beta_parameters_stocks_full_periods set touched = now() where permno = {}".format(permno)
+            query = "update beta_stocks_full_periods set touched = now() where permno = {}".format(permno)
             loader.sql_query_commit(query)
 
             continue
@@ -115,7 +117,7 @@ def train_stock_returns_full_periods(permno_from, permno_to):
         beta_convexity = (beta20[0] + beta20[-1]) / 2 - beta20[int((len(beta20) - 1) / 2)]
 
         query = """
-            update beta_parameters_stocks_full_periods
+            update beta_stocks_full_periods
             set touched = now(),
               parameters = '{}',
               beta_average = {},
