@@ -16,7 +16,11 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 ****************************************************
 
 * load beta statistics
-insheet using "beta_stats.csv", clear
+use beta_stats_roll, clear
+
+* need to choose optimal filtering conditions here
+drop if no_obs < 2000
+
 
 * drop outliers
 foreach beta of varlist beta_average beta_delay beta_convexity {
@@ -60,8 +64,8 @@ foreach beta of varlist beta_convexity beta_delay {
 	
 	gen pid_`beta' = .
 	replace pid_`beta' = pid_beta_average*10 + 1 if (`beta' < p33)
-	replace pid_`beta' = pid_beta_average*10 + 2 if (`beta' >= p33) & (`beta' < p67)
-	replace pid_`beta' = pid_beta_average*10 + 3 if (`beta' >= p67)
+	replace pid_`beta' = pid_beta_average*10 + 2 if (`beta' >= p33) & (`beta' <= p67)
+	replace pid_`beta' = pid_beta_average*10 + 3 if (`beta' > p67)
 	
 	drop p33 p67
 }
@@ -146,56 +150,61 @@ merge 1:1 date using "/Users/dioscuroi/Research Data/Stocks/Fama_French/ff3facto
 
 foreach beta in beta_convexity beta_delay {
 
-	foreach weight in ew vw {
+*	foreach weight in ew vw {
+	foreach weight in vw {
 	
-		disp ""
-		disp ""
-		disp "****************************************************************"
-		disp " `beta', `weight' "
-		disp "****************************************************************"
+*		foreach cond in "" "if date >= ym(1950,1)" {
+		foreach cond in ""  {
 	
-		matrix raw_exret 		= (0,0,0 \ 0,0,0 \ 0,0,0)
-		matrix raw_exret_tstat  = raw_exret
-		matrix capm_alpha_coef  = raw_exret
-		matrix capm_alpha_tstat = raw_exret
-		matrix ff3_alpha_coef   = raw_exret
-		matrix ff3_alpha_tstat  = raw_exret
+			disp ""
+			disp ""
+			disp "****************************************************************"
+			disp " `beta', `weight', `cond' "
+			disp "****************************************************************"
 	
-		forvalues i = 1/3 {
-		forvalues j = 1/3 {
-			quietly gen exret = `weight'r_`beta'`i'`j' * 100 - rf
+			matrix raw_exret 		= (0,0,0 \ 0,0,0 \ 0,0,0)
+			matrix raw_exret_tstat  = raw_exret
+			matrix capm_alpha_coef  = raw_exret
+			matrix capm_alpha_tstat = raw_exret
+			matrix ff3_alpha_coef   = raw_exret
+			matrix ff3_alpha_tstat  = raw_exret
+	
+			forvalues i = 1/3 {
+			forvalues j = 1/3 {
+				quietly gen exret = `weight'r_`beta'`i'`j' * 100 - rf
 			
-			* raw excess returns
-			quietly summarize exret
-			matrix raw_exret[`i',`j'] = r(mean)
-			matrix raw_exret_tstat[`i',`j'] = r(mean) / r(sd) * sqrt(r(N))
+				* raw excess returns
+				quietly summarize exret `cond'
+				matrix raw_exret[`i',`j'] = r(mean)
+				matrix raw_exret_tstat[`i',`j'] = r(mean) / r(sd) * sqrt(r(N))
 			
-			* CAPM alpha
-			quietly reg exret mktrf
-			matrix coef = e(b)
-			matrix cov = e(V)
+				* CAPM alpha
+				quietly reg exret mktrf `cond'
+				matrix coef = e(b)
+				matrix cov = e(V)
 			
-			matrix capm_alpha_coef[`i',`j'] = coef[1,2]
-			matrix capm_alpha_tstat[`i',`j'] = coef[1,2] / sqrt(cov[2,2])
+				matrix capm_alpha_coef[`i',`j'] = coef[1,2]
+				matrix capm_alpha_tstat[`i',`j'] = coef[1,2] / sqrt(cov[2,2])
 			
-			* FF3 alpha
-			quietly reg exret mktrf smb hml
-			matrix coef = e(b)
-			matrix cov = e(V)
+				* FF3 alpha
+				quietly reg exret mktrf smb hml `cond'
+				matrix coef = e(b)
+				matrix cov = e(V)
 			
-			matrix ff3_alpha_coef[`i',`j'] = coef[1,4]
-			matrix ff3_alpha_tstat[`i',`j'] = coef[1,4] / sqrt(cov[4,4])
+				matrix ff3_alpha_coef[`i',`j'] = coef[1,4]
+				matrix ff3_alpha_tstat[`i',`j'] = coef[1,4] / sqrt(cov[4,4])
 			
-			drop exret
-		}
-		}
+				drop exret
+			}
+			}
 		
-		matrix list raw_exret
-		matrix list raw_exret_tstat
-		matrix list capm_alpha_coef
-		matrix list capm_alpha_tstat
-		matrix list ff3_alpha_coef
-		matrix list ff3_alpha_tstat
+			matrix list raw_exret
+			matrix list raw_exret_tstat
+			matrix list capm_alpha_coef
+			matrix list capm_alpha_tstat
+			matrix list ff3_alpha_coef
+			matrix list ff3_alpha_tstat
+		}
 	}
 }
 
