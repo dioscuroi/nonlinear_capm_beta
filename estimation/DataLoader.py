@@ -187,7 +187,7 @@ class DataLoader:
 
         query = """
             select year, rank, permno
-            from beta_parameters_stocks
+            from beta_stocks_rolling
             where year = {} and rank <= {} and no_obs is null
             order by rank
         """.format(year, max_rank)
@@ -207,7 +207,7 @@ class DataLoader:
 
         query = """
             select permno
-            from beta_parameters_stocks
+            from beta_stocks_rolling
             where year = {} and rank <= {} and parameters is not null
             order by rank
         """.format(year, max_rank)
@@ -227,7 +227,7 @@ class DataLoader:
 
         query = """
             select permno
-            from beta_parameters_stocks
+            from beta_stocks_rolling
             where year = {} and parameters is not null and beta_average is null
             order by rank
         """.format(year)
@@ -247,7 +247,7 @@ class DataLoader:
 
         query = """
             select parameters
-            from beta_parameters_stocks
+            from beta_stocks_rolling
             where year = {} and permno = {}
         """.format(year, permno)
 
@@ -287,7 +287,7 @@ class DataLoader:
         """
 
         query = """
-          update beta_parameters_stocks
+          update beta_stocks_rolling
           set no_obs = {}
           where year = {} and permno = {}
         """.format(no_obs, year, permno)
@@ -302,7 +302,7 @@ class DataLoader:
 
         query = """
           select parameters
-          from beta_parameters_stocks
+          from beta_stocks_rolling
           where year = {} and permno = {}
         """.format(year, permno)
 
@@ -359,7 +359,7 @@ class DataLoader:
         """
 
         query = """
-            update beta_parameters_stocks
+            update beta_stocks_rolling
             set beta_average = {}, beta_delay = {}, beta_convexity = {}
             where year = {} and permno = {}
         """.format(beta_average, beta_delay, beta_convexity, year, permno)

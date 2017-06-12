@@ -126,7 +126,7 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
             beta_convexity = (beta20[0] + beta20[-1]) / 2 - beta20[int((len(beta20) - 1) / 2)]
 
             query = """
-              update beta_parameters_stocks
+              update beta_stocks_rolling
               set no_obs = {},
                 sample_from = '{}',
                 sample_to = '{}',

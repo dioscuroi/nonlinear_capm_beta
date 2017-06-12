@@ -5,11 +5,11 @@ from nonlinear_capm_beta.estimation.DataLoader import DataLoader
 loader = DataLoader(connect=True)
 
 ######################################################
-# Load and write beta_parameters_stocks table
+# Load and write beta_stocks_rolling table
 ######################################################
 
 query = "select year, rank, permno, no_obs, beta_average, beta_delay, beta_convexity \
-  from beta_parameters_stocks where beta_average is not null"
+  from beta_stocks_rolling where beta_average is not null"
 
 beta_stats = loader.sql_query_select(query)
 

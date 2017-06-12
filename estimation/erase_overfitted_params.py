@@ -30,7 +30,7 @@ def erase_overfitted_params(year_from=1931, year_to=2015):
 
             if check_if_overfitted_by_param(param):
 
-                query = """update beta_parameters_stocks
+                query = """update beta_stocks_rolling
                            set no_obs = null, sample_from = null, sample_to = null, parameters = null,
                               beta_average = null, beta_delay = null, beta_convexity = null
                            where year = {} and permno = {}""".format(year, permno)

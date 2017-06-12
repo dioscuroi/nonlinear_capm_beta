@@ -44,7 +44,7 @@ summarize beta_*, detail
 
 corr beta_*
 
-reg avg_ret beta_*
+reg avg_exret beta_*
 reg avg_capm_alpha beta_*
 reg avg_ff3_alpha beta_*
 

@@ -17,18 +17,18 @@ from
 ) t;
 
 
-drop table if exists beta_parameters_stocks;
+drop table if exists beta_stocks_rolling;
 
-create table beta_parameters_stocks as
+create table beta_stocks_rolling as
 select year, rank, permno
 from year_end_marcap_ranked
 where year >= 1930
 order by year, rank;
 
-alter table beta_parameters_stocks
+alter table beta_stocks_rolling
 add primary key(year, rank);
 
-alter table beta_parameters_stocks
+alter table beta_stocks_rolling
 add column sample_from date,
 add column sample_to date,
 add column parameters text;
