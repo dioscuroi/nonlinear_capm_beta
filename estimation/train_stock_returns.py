@@ -10,7 +10,7 @@ from Trainer import Trainer
 from DataLoader import DataLoader
 
 
-def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
+def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
 
     print("***********************************")
     print(" Train Stock Returns")
@@ -168,7 +168,7 @@ if __name__ == "__main__":
         max_rank = int(sys.argv[3])
 
     else:
-        year_from = 1936
+        year_from = 1930
         year_to = 2015
         max_rank = 500
 
