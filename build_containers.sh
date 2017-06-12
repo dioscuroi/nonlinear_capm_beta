@@ -17,8 +17,12 @@ docker build -t awsbatch/beta_estimation .
 docker tag awsbatch/beta_estimation:latest 026533969070.dkr.ecr.us-west-2.amazonaws.com/awsbatch/beta_estimation:latest
 
 echo ""
-echo "Pushing the container to AWS"
+echo "* Pushing the container to AWS"
 
 docker push 026533969070.dkr.ecr.us-west-2.amazonaws.com/awsbatch/beta_estimation:latest
 
+echo ""
+echo "* Deleting dangling Docker images"
+
+docker rmi $(docker images -f "dangling=true" -q)
 
