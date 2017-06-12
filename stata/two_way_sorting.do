@@ -11,6 +11,7 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 !rm two_way_sorting*.txt
 
 
+/*
 ****************************************************
 * Prepare data
 ****************************************************
@@ -141,20 +142,20 @@ use temp_portfolio_returns_beta_delay, clear
 merge 1:1 date using temp_portfolio_returns_beta_convexity, nogen
 
 save temp_portfolio_returns_combined, replace
-
+*/
 
 * print regression results
 use temp_portfolio_returns_combined, clear
 
 merge 1:1 date using "/Users/dioscuroi/Research Data/Stocks/Fama_French/ff3factors_monthly.dta", nogen
 
-foreach beta in beta_convexity beta_delay {
+foreach beta in beta_delay beta_convexity {
 
 *	foreach weight in ew vw {
 	foreach weight in vw {
 	
 *		foreach cond in "" "if date >= ym(1950,1)" {
-		foreach cond in ""  {
+		foreach cond in "" {
 	
 			disp ""
 			disp ""
@@ -162,7 +163,7 @@ foreach beta in beta_convexity beta_delay {
 			disp " `beta', `weight', `cond' "
 			disp "****************************************************************"
 	
-			matrix raw_exret 		= (0,0,0 \ 0,0,0 \ 0,0,0)
+			matrix raw_exret 		= (0,0,0,0 \ 0,0,0,0 \ 0,0,0,0)
 			matrix raw_exret_tstat  = raw_exret
 			matrix capm_alpha_coef  = raw_exret
 			matrix capm_alpha_tstat = raw_exret
@@ -170,32 +171,38 @@ foreach beta in beta_convexity beta_delay {
 			matrix ff3_alpha_tstat  = raw_exret
 	
 			forvalues i = 1/3 {
-			forvalues j = 1/3 {
-				quietly gen exret = `weight'r_`beta'`i'`j' * 100 - rf
+				forvalues j = 1/4 {
+				
+					if `j' <= 3 {
+						quietly gen exret = `weight'r_`beta'`i'`j' * 100 - rf
+					}
+					else {
+						quietly gen exret = (`weight'r_`beta'`i'3 - `weight'r_`beta'`i'1) * 100
+					}
 			
-				* raw excess returns
-				quietly summarize exret `cond'
-				matrix raw_exret[`i',`j'] = r(mean)
-				matrix raw_exret_tstat[`i',`j'] = r(mean) / r(sd) * sqrt(r(N))
+					* raw excess returns
+					quietly summarize exret `cond'
+					matrix raw_exret[`i',`j'] = r(mean)
+					matrix raw_exret_tstat[`i',`j'] = r(mean) / r(sd) * sqrt(r(N))
 			
-				* CAPM alpha
-				quietly reg exret mktrf `cond'
-				matrix coef = e(b)
-				matrix cov = e(V)
+					* CAPM alpha
+					quietly reg exret mktrf `cond'
+					matrix coef = e(b)
+					matrix cov = e(V)
 			
-				matrix capm_alpha_coef[`i',`j'] = coef[1,2]
-				matrix capm_alpha_tstat[`i',`j'] = coef[1,2] / sqrt(cov[2,2])
+					matrix capm_alpha_coef[`i',`j'] = coef[1,2]
+					matrix capm_alpha_tstat[`i',`j'] = coef[1,2] / sqrt(cov[2,2])
 			
-				* FF3 alpha
-				quietly reg exret mktrf smb hml `cond'
-				matrix coef = e(b)
-				matrix cov = e(V)
+					* FF3 alpha
+					quietly reg exret mktrf smb hml `cond'
+					matrix coef = e(b)
+					matrix cov = e(V)
 			
-				matrix ff3_alpha_coef[`i',`j'] = coef[1,4]
-				matrix ff3_alpha_tstat[`i',`j'] = coef[1,4] / sqrt(cov[4,4])
+					matrix ff3_alpha_coef[`i',`j'] = coef[1,4]
+					matrix ff3_alpha_tstat[`i',`j'] = coef[1,4] / sqrt(cov[4,4])
 			
-				drop exret
-			}
+					drop exret
+				}
 			}
 		
 			matrix list raw_exret
