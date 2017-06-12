@@ -16,20 +16,23 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 * Prepare data
 ****************************************************
 
-/*
 * compute average stock returns
 use "/Users/dioscuroi/Research Data/Stocks/CRSP stock returns/stocks_monthly_filtered.dta", clear
 
 keep if date >= ym(1926,7)
 keep if ret != .
-keep permno ret
+keep date permno ret
+
+merge m:1 date using "/Users/dioscuroi/Research Data/Stocks/Fama_French/ff3factors_monthly.dta", keep(match) nogen
+
+gen exret = ret * 100 - rf
 
 bysort permno: egen cnt = count(ret)
-bysort permno: egen avg_ret = mean(ret)
+bysort permno: egen avg_exret = mean(exret)
 
 drop if cnt < 5
 
-keep permno cnt avg_ret
+keep permno cnt avg_exret
 duplicates drop
 
 * create a template to save results
@@ -37,7 +40,6 @@ gen avg_capm_alpha = .
 gen avg_ff3_alpha = .
 
 save average_returns_of_every_stock, replace
-*/
 
 
 * iterate for each stock
@@ -79,4 +81,4 @@ forvalues i = 189/`no_obs' {
 		save average_returns_of_every_stock, replace
 	}
 }
-
+*/
