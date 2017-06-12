@@ -19,7 +19,8 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
     print(" max_rank: {}".format(max_rank))
     print("***********************************")
 
-    no_lags = 5
+    no_lags = 1
+    no_years = 5
 
     loader = DataLoader(connect=True)
 
@@ -33,7 +34,7 @@ def train_stock_returns(year_from=1936, year_to=2016, max_rank=500):
         print(" Year: {}".format(year))
         print("***********************************")
 
-        date_from = date(year-9, 1, 1)
+        date_from = date(year-(no_years-1), 1, 1)
         date_to = date(year, 12, 31)
 
         print("Loading market returns...")
