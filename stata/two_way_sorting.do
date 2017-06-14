@@ -11,7 +11,6 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 !rm two_way_sorting*.txt
 
 
-/*
 ****************************************************
 * Prepare data
 ****************************************************
@@ -20,16 +19,19 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 use beta_stats_roll, clear
 
 * need to choose optimal filtering conditions here
-drop if no_obs < 2000
+drop if no_obs < 100
 
 
 * drop outliers
 foreach beta of varlist beta_average beta_delay beta_convexity {
+
+	bysort year: egen cut1 = pctile(`beta'), p(1)
+	bysort year: egen cut2 = pctile(`beta'), p(99)
 	
-	_pctile `beta', p(1 99)
+	replace `beta' = . if `beta' < cut1
+	replace `beta' = . if `beta' > cut2
 	
-	replace `beta' = . if `beta' < r(r1)
-	replace `beta' = . if `beta' > r(r2)
+	drop cut1 cut2
 }
 
 drop if beta_average == .
@@ -142,7 +144,7 @@ use temp_portfolio_returns_beta_delay, clear
 merge 1:1 date using temp_portfolio_returns_beta_convexity, nogen
 
 save temp_portfolio_returns_combined, replace
-*/
+
 
 * print regression results
 use temp_portfolio_returns_combined, clear
