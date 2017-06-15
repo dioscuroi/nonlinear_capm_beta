@@ -67,6 +67,10 @@ def train_portfolio_helper(filename, pf_returns, mktrf):
     no_obs = len(merged)
     no_lags = len(mktrf.columns) - 3
 
+    # return if the number of observations is not sufficient enough
+    if no_obs < (no_lags + 1) * 2:
+        return
+
     print("")
     print("*************************************************")
     print("({})".format(datetime.today()))
@@ -170,7 +174,7 @@ sql_loader = DataLoader(connect=True)
 if __name__ == "__main__":
 
     # default parameters
-    filename = 'ff25portfolios_daily'
+    filename = 'portfolio_size_daily'
     portfolio = None
     no_lags = 20
 
