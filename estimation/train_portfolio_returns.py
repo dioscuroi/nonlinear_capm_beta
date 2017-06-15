@@ -30,7 +30,7 @@ def train_portfolio_returns(filename, portfolio, no_lags):
     if str.find(filename, 'daily') >= 0:
         df_markets = pd.read_stata(data_path + 'ff3factors_daily.dta')
     else:
-        df_markets = pd.read_stata(data_path + 'ff3factors.dta')
+        df_markets = pd.read_stata(data_path + 'ff3factors_monthly.dta')
 
     df_markets = df_markets[['date', 'mktrf', 'rf']]
 
@@ -169,14 +169,12 @@ sql_loader = DataLoader(connect=True)
 # call the main function when called directly
 if __name__ == "__main__":
 
-    # # Connect to SQL server
-    # sql_loader = DataLoader(connect=True)
-    #
-    # Parse parameters
-    filename = 'portfolio_49industry_daily'
+    # default parameters
+    filename = 'ff25portfolios_daily'
     portfolio = None
     no_lags = 20
 
+    # parse parameters passed over from the command line
     if len(sys.argv) >= 2:
         filename = sys.argv[1]
 
