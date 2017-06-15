@@ -149,7 +149,7 @@ def train_portfolio_helper(filename, pf_returns, mktrf):
       insert into beta_portfolios
       VALUES
       ('{}', '{}', {}, {}, {}, now(), '{}', {}, {}, {})
-    """.format(filename, pf_name, no_lags, no_obs, next_id,
+    """.format(filename, pf_name, no_lags, next_id, no_obs,
                json.dumps(params), beta_average, beta_delay, beta_convexity)
 
     sql_loader.sql_query_commit(query)
