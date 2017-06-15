@@ -155,6 +155,7 @@ def train_portfolio_helper(filename, pf_returns, mktrf):
     sql_loader.sql_query_commit(query)
 
     print("Results:")
+    print(" - filename: {}, portfolio: {}".format(filename, pf_name))
     print(" - beta_average: {:.3f}, beta_delay: {:.3f}, beta_convexity: {:.3f}".format(
         beta_average, beta_delay, beta_convexity))
     print("")
