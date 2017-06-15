@@ -58,6 +58,52 @@ reshape long avg_exr_, i(filename) j(portfolio) string
 
 append using portfolio_beta_risk_premium
 
+save portfolio_beta_risk_premium, replace
+
+
+* portfolio_size
+use "/Users/dioscuroi/OneDrive - UNSW/Research Data/Stocks/Fama_French/portfolio_size", clear
+
+merge 1:1 date using "/Users/dioscuroi/OneDrive - UNSW/Research Data/Stocks/Fama_French/ff3factors_monthly.dta", nogen keep(match)
+
+foreach col of var d1-d10 {
+	replace `col' = . if `col' < -99
+	gen exret_`col' = `col' - rf
+	egen avg_exr_`col' = mean(exret_`col')
+}
+
+keep avg_exr_*
+duplicates drop
+
+gen filename = "portfolio_size_daily"
+
+reshape long avg_exr_, i(filename) j(portfolio) string
+
+append using portfolio_beta_risk_premium
+
+save portfolio_beta_risk_premium, replace
+
+
+* portfolio_value
+use "/Users/dioscuroi/OneDrive - UNSW/Research Data/Stocks/Fama_French/portfolio_value", clear
+
+merge 1:1 date using "/Users/dioscuroi/OneDrive - UNSW/Research Data/Stocks/Fama_French/ff3factors_monthly.dta", nogen keep(match)
+
+foreach col of var d1-d10 {
+	replace `col' = . if `col' < -99
+	gen exret_`col' = `col' - rf
+	egen avg_exr_`col' = mean(exret_`col')
+}
+
+keep avg_exr_*
+duplicates drop
+
+gen filename = "portfolio_value_daily"
+
+reshape long avg_exr_, i(filename) j(portfolio) string
+
+append using portfolio_beta_risk_premium
+
 rename avg_exr_ avg_exr
 
 save portfolio_beta_risk_premium, replace
@@ -70,7 +116,7 @@ save portfolio_beta_risk_premium, replace
 
 use portfolio_beta_risk_premium, clear
 
-merge 1:1 filename portfolio using beta_portfolios, nogen
+merge 1:1 filename portfolio using beta_portfolios, nogen keep(match)
 
 drop if beta_average > 6
 
@@ -92,5 +138,15 @@ reg avg_exr beta_average if filename == "ff25portfolios_daily"
 reg avg_exr beta_delay if filename == "ff25portfolios_daily"
 reg avg_exr beta_convexity if filename == "ff25portfolios_daily"
 reg avg_exr beta_average beta_delay beta_convexity if filename == "ff25portfolios_daily"
+
+reg avg_exr beta_average if filename == "portfolio_size_daily"
+reg avg_exr beta_delay if filename == "portfolio_size_daily"
+reg avg_exr beta_convexity if filename == "portfolio_size_daily"
+reg avg_exr beta_average beta_delay beta_convexity if filename == "portfolio_size_daily"
+
+reg avg_exr beta_average if filename == "portfolio_value_daily"
+reg avg_exr beta_delay if filename == "portfolio_value_daily"
+reg avg_exr beta_convexity if filename == "portfolio_value_daily"
+reg avg_exr beta_average beta_delay beta_convexity if filename == "portfolio_value_daily"
 
 
