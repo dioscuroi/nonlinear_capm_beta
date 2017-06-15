@@ -1,91 +1,194 @@
 import sys
+import json
 import numpy as np
 import pandas as pd
 
+from datetime import date, datetime
+
+from utils import *
 from Trainer import Trainer
 from DataLoader import DataLoader
 from nonlinear_capm_beta.figures.plot_cum_beta import plot_cum_beta
 
 
-def train_portfolio_returns(freq='monthly', portfolio_name=None, depth=2, width=1):
+def train_portfolio_returns(filename, portfolio, no_lags):
 
-    print("***********************************")
+    print("*************************************************")
     print(" Train Portfolio Returns")
-    print(" freq: {}".format(freq))
-    print(" depth: {}, width: {}".format(depth, width))
-    print("***********************************")
+    print(" ")
+    print(" filename: {}".format(filename))
+    print(" portfolio: {}".format(portfolio))
+    print(" no_lags: {}".format(no_lags))
+    print("*************************************************")
 
-    if freq == 'daily':
-        no_lags = 20
+
+    # Load portfolio and market returns
+    data_path = '/Users/dioscuroi/OneDrive - UNSW/Research Data/Stocks/Fama_French/'
+
+    df_portfolios = pd.read_stata(data_path + filename + '.dta')
+
+    if str.find(filename, 'daily') >= 0:
+        df_markets = pd.read_stata(data_path + 'ff3factors_daily.dta')
     else:
-        no_lags = 1
+        df_markets = pd.read_stata(data_path + 'ff3factors.dta')
 
-    # Load market returns
-    loader = DataLoader(connect=True)
+    df_markets = df_markets[['date', 'mktrf', 'rf']]
 
-    mktrf = loader.load_market_returns(freq, no_lags=no_lags)
+    # Generate lagged returns
+    for i in range(no_lags):
+        df_markets['L{}.mktrf'.format(i + 1)] = df_markets['mktrf'].shift(i + 1)
 
-    # now run the machine learning on portfolio returns
-    if portfolio_name is None:
-        portfolio_list = ['small', 'large', 'growth', 'value', 'smb', 'hml']
+    idx_missing = np.isnan(df_markets[df_markets.columns[-1]])
 
-        if freq == 'monthly':
-            portfolio_list.extend(['small-growth', 'small-value', 'large-growth', 'large-value'])
+    df_markets = df_markets.loc[~idx_missing]
+
+    # Iterate for portfolios
+    if portfolio is None:
+        for col in df_portfolios.columns[1:]:
+            train_portfolio_helper(filename, df_portfolios[['date', col]], df_markets)
 
     else:
-        portfolio_list = [portfolio_name]
-
-    for portfolio in portfolio_list:
-
-        print(" ")
-        print("***********************************")
-        print(" Portfolio Name: {}".format(portfolio))
-        print("***********************************")
-        print(" ")
-
-        # Load portfolio returns
-        pf_returns = loader.load_portfolio_returns(freq, portfolio)
-
-        merged = pd.merge(mktrf, pf_returns, on='date')
-
-        if (portfolio == 'smb') or (portfolio == 'hml'):
-            y_data = merged.loc[:, 'pfret']
-        else:
-            y_data = merged.loc[:,'pfret'] - merged.loc[:,'rf']
-
-        y_data = y_data.as_matrix().reshape(-1, 1)
-
-        x_data = merged.iloc[:,1:-1]
-        del x_data['rf']
-        x_data = x_data.as_matrix()
-
-        # Initialize the trainer
-        trainer = Trainer(depth, width, no_lags+1)
-
-        param = loader.load_portfolio_params(portfolio, freq, no_lags, depth, width)
-
-        if param is None:
-            trainer.run_ols_regression(x_data, y_data)
-        else:
-            trainer.load_parameters(param)
-
-        # launch the learning
-        params = trainer.train(x_data, y_data)
-
-        loader.save_portfolio_params(params, name=portfolio, freq=freq, lags=no_lags, depth=depth, width=width)
-
-        plot_cum_beta(freq, portfolio)
-
-        del trainer
-
-    loader.close()
+        train_portfolio_helper(filename, df_portfolios[['date', portfolio]], df_markets)
 
     return
 
 
+def train_portfolio_helper(filename, pf_returns, mktrf):
+
+    # drop missing returns
+    idx_missing = (pf_returns.iloc[:, 1] < -99)
+
+    pf_returns = pf_returns.loc[~idx_missing]
+
+    merged = pd.merge(pf_returns, mktrf, on='date')
+
+    # Retrieve portfolio info and print
+    pf_name = pf_returns.columns[1]
+    no_obs = len(merged)
+    no_lags = len(mktrf.columns) - 3
+
+    print("")
+    print("*************************************************")
+    print("({})".format(datetime.today()))
+    print("portfolio: {}".format(pf_name))
+    print("no_obs: {}".format(no_obs))
+    print("*************************************************")
+
+    if (pf_name == 'smb') or (pf_name == 'hml'):
+        y_data = merged.loc[:, pf_name]
+    else:
+        y_data = merged.loc[:, pf_name] - merged.loc[:, 'rf']
+
+    y_data = y_data.as_matrix().reshape(-1, 1)
+
+    x_data = merged.iloc[:, 2:]
+    del x_data['rf']
+    x_data = x_data.as_matrix()
+
+    # Initialize the trainer
+    max_retries = 5
+    zero_init = True
+
+    for attempt_id in range(max_retries):
+
+        trainer = Trainer(depth=2, width=1, no_inputs=x_data.shape[1], zero_init=zero_init)
+
+        trainer.run_ols_regression(x_data, y_data)
+
+        params = trainer.train(x_data, y_data, x_tolerance=1e-4, cost_tolerance=1e-4)
+
+        del trainer
+
+        if not check_if_overfitted_by_param(params, freq="daily", no_lags=no_lags):
+            break
+
+        params = None
+        zero_init = False
+
+        print("Parameters are overfitted. Let's try again.")
+        print("")
+
+    # if parameters are still overfitted, replace parameters with OLS coefficients
+    if params is None:
+        trainer = Trainer(depth=2, width=1, no_inputs=x_data.shape[1], zero_init=True)
+        trainer.run_ols_regression(x_data, y_data)
+        params = trainer.flush_params_to_dict()
+
+    # compute beta
+    if str.find(filename, 'daily') >= 0:
+        freq = 'daily'
+    else:
+        freq = 'monthly'
+
+    beta = compute_beta(param=params, freq=freq, no_lags=no_lags)
+
+    assert (not check_if_overfitted_by_beta(beta))
+
+    beta0 = beta[:, 0]
+    beta20 = np.sum(beta, axis=1)
+
+    beta_average = np.mean(beta20)
+    beta_delay = np.mean(beta20) - np.mean(beta0)
+    beta_convexity = (beta20[0] + beta20[-1]) / 2 - beta20[int((len(beta20) - 1) / 2)]
+
+    # Save the results to SQL server
+    query = """
+        select max(id)
+        from beta_portfolios
+        where filename = '{}' and portfolio = '{}' and lags = {}
+    """.format(filename, pf_name, no_lags)
+
+    max_id = sql_loader.sql_query_select(query)
+
+    if max_id.iloc[0,0] is None:
+        next_id = 1
+    else:
+        next_id = max_id.iloc[0,0] + 1
+
+    query = """
+      insert into beta_portfolios
+      VALUES
+      ('{}', '{}', {}, {}, {}, now(), '{}', {}, {}, {})
+    """.format(filename, pf_name, no_lags, no_obs, next_id,
+               json.dumps(params), beta_average, beta_delay, beta_convexity)
+
+    sql_loader.sql_query_commit(query)
+
+    print("Results:")
+    print(" - beta_average: {:.3f}, beta_delay: {:.3f}, beta_convexity: {:.3f}".format(
+        beta_average, beta_delay, beta_convexity))
+    print("")
+
+    return
+
+
+# Global variables
+sql_loader = DataLoader(connect=True)
+
 # call the main function when called directly
 if __name__ == "__main__":
 
-    train_portfolio_returns("daily")
+    # # Connect to SQL server
+    # sql_loader = DataLoader(connect=True)
+    #
+    # Parse parameters
+    filename = 'portfolio_49industry_daily'
+    portfolio = None
+    no_lags = 20
+
+    if len(sys.argv) >= 2:
+        filename = sys.argv[1]
+
+    if len(sys.argv) >= 3:
+        portfolio = sys.argv[2]
+
+    if len(sys.argv) >= 4:
+        no_lags = int(sys.argv[3])
+
+    # Estimate beta parameters
+    train_portfolio_returns(filename, portfolio, no_lags)
+
+    # Terminate
+    sql_loader.close()
 
     print('** beep **\a')
