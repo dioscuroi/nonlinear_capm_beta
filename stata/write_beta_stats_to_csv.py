@@ -13,7 +13,7 @@ query = "select year, rank, permno, no_obs, beta_average, beta_delay, beta_conve
 
 beta_stats = loader.sql_query_select(query)
 
-beta_stats.to_stata('beta_stats_roll.dta', write_index=False)
+beta_stats.to_stata('beta_stats_roll_lag20.dta', write_index=False)
 
 
 ######################################################
