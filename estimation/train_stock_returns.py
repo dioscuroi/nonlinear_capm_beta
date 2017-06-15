@@ -19,8 +19,9 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
     print(" max_rank: {}".format(max_rank))
     print("***********************************")
 
-    no_lags = 1
+    no_lags = 20
     no_years = 5
+    min_no_obs = 500
 
     loader = DataLoader(connect=True)
 
@@ -72,7 +73,7 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
 
             no_obs = len(merged)
 
-            if no_obs < 1000:
+            if no_obs < min_no_obs:
                 print("Skip this stock due to the lack of observations (obs:{})".format(no_obs))
                 loader.save_stock_params_only_no_obs(year, permno, no_obs)
 
