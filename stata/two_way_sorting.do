@@ -16,7 +16,7 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 ****************************************************
 
 * load beta statistics
-use beta_stats_roll, clear
+use beta_stats_roll_lag20, clear
 
 * need to choose optimal filtering conditions here
 drop if no_obs < 100
@@ -87,7 +87,7 @@ table pid_beta_delay, c(mean beta_average mean beta_delay)
 gen date = ym(year, 12)
 format %tm date
 
-merge 1:1 permno date using "/Users/dioscuroi/Research Data/Stocks/CRSP stock returns/stocks_monthly_filtered.dta", nogen
+merge 1:1 permno date using "/Users/dioscuroi/OneDrive - UNSW/Research Data/Stocks/CRSP stock returns/stocks_monthly_filtered.dta", nogen
 
 gen marcap = prc * shrout
 
@@ -149,7 +149,7 @@ save temp_portfolio_returns_combined, replace
 * print regression results
 use temp_portfolio_returns_combined, clear
 
-merge 1:1 date using "/Users/dioscuroi/Research Data/Stocks/Fama_French/ff3factors_monthly.dta", nogen
+merge 1:1 date using "/Users/dioscuroi/OneDrive - UNSW/Research Data/Stocks/Fama_French/ff3factors_monthly.dta", nogen
 
 foreach beta in beta_delay beta_convexity {
 
