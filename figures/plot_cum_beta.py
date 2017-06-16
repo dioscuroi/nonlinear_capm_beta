@@ -1,32 +1,60 @@
+import sys
+import json
 import os.path
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
 from nonlinear_capm_beta.estimation import *
 
 
-def plot_cum_beta(freq="monthly", portfolio=None):
+def plot_cum_beta(filename, portfolio):
     """plot_cum_beta
     """
 
     print("")
     print("***********************************")
-    print(" plot_cum_beta() ")
-    print(" freq: {}".format(freq))
+    print(" plot_cum_beta ")
+    print(" filename: {}".format(filename))
+    print(" portfolio: {}".format(portfolio))
     print("***********************************")
+    print("")
 
-    if freq == "monthly":
-        no_lags = 1
-        mktrf = np.arange(-20, 20 + 0.001, .2)
-        # portfolio_list = ['small-growth', 'small-value', 'large-growth', 'large-value', 'smb', 'hml']
-        portfolio_list = ['small-growth', 'small-value', 'large-growth', 'large-value', 'smb', 'hml', 'small', 'large', 'growth', 'value']
-
-    else:
-        no_lags = 20
-        mktrf = np.arange(-3, 3 + 0.001, .1)
-        portfolio_list = ['small', 'large', 'growth', 'value', 'smb', 'hml']
+    query = """
+        select portfolio, id, parameters
+        from beta_portfolios
+        where filename = '{}'
+    """.format(filename)
 
     if portfolio is not None:
-        portfolio_list = [portfolio]
+        query = query + " and portfolio = '{}'".format(portfolio)
+
+    df = sql_loader.sql_query_select(query)
+
+    for i in range(len(df)):
+        portfolio = df.loc[i, 'portfolio']
+        id = df.loc[i, 'id']
+        param = json.loads(df.loc[i, 'parameters'])
+
+        plot_cum_beta_helper(filename, portfolio, id, param)
+
+    return
+
+
+def plot_cum_beta_helper(filename, portfolio, id, param):
+
+    plot_title = "{}_{}_{}".format(filename, portfolio, id)
+
+    print("Processing {}".format(plot_title))
+
+    # fix no_lags to 20 for the moment
+    no_lags = 20
+
+    # prepare the x-axis to draw beta
+    if str.find(filename, 'daily') >= 0:
+        mktrf = np.arange(-3, 3 + 0.001, .1)
+    else:
+        mktrf = np.arange(-20, 20 + 0.001, .2)
 
     # Beta plot is drawn on the basis that RmRf is a vector of equal values
     x_data = np.zeros([len(mktrf), no_lags + 1])
@@ -34,44 +62,55 @@ def plot_cum_beta(freq="monthly", portfolio=None):
     for i in range(0, no_lags + 1):
         x_data[:,i] = mktrf
 
-    # Prepare DataLoader and Trainer
-    loader = DataLoader(connect=True)
-
+    # compute cumulative beta
     trainer = Trainer()
 
-    print("")
+    trainer.load_parameters(param)
 
-    # Iterate for portfolios
-    for portfolio in portfolio_list:
+    [_, beta] = trainer.derive_expret_beta(x_data)
 
-        print("Portfolio: {}".format(portfolio))
+    output_beta = np.zeros([len(mktrf), no_lags + 1])
 
-        param = loader.load_portfolio_params(portfolio, freq, no_lags, depth=2, width=1)
+    beta = beta[0]
+    output_beta[:,0] = beta[:,0]
 
-        assert param is not None
+    for i in range(1, no_lags + 1):
+        output_beta[:,i] = output_beta[:,i-1] + beta[:,i]
 
-        trainer.load_parameters(param)
+    del trainer
 
-        [_, beta] = trainer.derive_expret_beta(x_data)
+    # draw the cumulative beta graph using pyplot
+    plt.figure(figsize=(6,3))
 
-        output_beta = np.zeros([len(mktrf), no_lags + 1])
+    plt.plot(mktrf, output_beta[:,0], 'r.', label='cum.beta.0')
+    plt.plot(mktrf, output_beta[:,5], 'g--', label='cum.beta.5')
+    plt.plot(mktrf, output_beta[:,20], 'k-', label='cum.beta.20')
 
-        beta = beta[0]
-        output_beta[:,0] = beta[:,0]
+    # plt.title(plot_title)
+    plt.legend(loc='upper center')
 
-        for i in range(1, no_lags + 1):
-            output_beta[:,i] = output_beta[:,i-1] + beta[:,i]
+    if str.find(filename, 'value') >= 0:
+        plt.yticks(np.arange(0.8,2.01,0.2))
+    else:
+        plt.yticks(np.arange(0.7,2.51,0.3))
 
-        filename = "outputs/plot_cum_beta_{}_{}.csv".format(freq, portfolio)
+    plt.savefig('outputs/plot_cum_beta_{}.png'.format(plot_title))
+    plt.close()
 
-        output = np.concatenate((mktrf.reshape((-1,1)), output_beta), axis=1)
+    return
 
-        np.savetxt(filename, output, fmt='%.4f', delimiter='\t')
 
-    # Terminate
-    loader.close()
+# Global variables
+sql_loader = None
 
 if __name__ == "__main__":
-    # plot_cum_beta("daily")
-    plot_cum_beta("monthly")
+
+    sql_loader = DataLoader(connect=True)
+
+    plot_cum_beta('portfolio_size_daily', 'd1')
+    plot_cum_beta('portfolio_size_daily', 'd10')
+    plot_cum_beta('portfolio_value_daily', 'd1')
+    plot_cum_beta('portfolio_value_daily', 'd10')
+
+    sql_loader.close()
 
