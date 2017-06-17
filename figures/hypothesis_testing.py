@@ -45,6 +45,7 @@ def hypothesis_testing(filename, portfolio):
 
 def hypothesis_testing_helper(filename, portfolio, id, param):
 
+    print("")
     print("Processing {}_{}_{}".format(filename, portfolio, id))
 
     # Load data
