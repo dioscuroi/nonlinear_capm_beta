@@ -99,7 +99,7 @@ def train_portfolio_helper(filename, pf_returns, mktrf):
 
         trainer.run_ols_regression(x_data, y_data)
 
-        params = trainer.train(x_data, y_data, x_tolerance=1e-4, cost_tolerance=1e-4)
+        params = trainer.train(x_data, y_data, x_tolerance=1e-6, cost_tolerance=1e-6)
 
         del trainer
 
@@ -168,28 +168,35 @@ def train_portfolio_helper(filename, pf_returns, mktrf):
 
 
 # Global variables
-sql_loader = DataLoader(connect=True)
+sql_loader = None
 
 # call the main function when called directly
 if __name__ == "__main__":
 
-    # default parameters
-    filename = 'portfolio_size_daily'
-    portfolio = None
-    no_lags = 20
+    sql_loader = DataLoader(connect=True)
 
-    # parse parameters passed over from the command line
-    if len(sys.argv) >= 2:
-        filename = sys.argv[1]
+    # # default parameters
+    # filename = 'portfolio_size_daily'
+    # portfolio = None
+    # no_lags = 20
+    #
+    # # parse parameters passed over from the command line
+    # if len(sys.argv) >= 2:
+    #     filename = sys.argv[1]
+    #
+    # if len(sys.argv) >= 3:
+    #     portfolio = sys.argv[2]
+    #
+    # if len(sys.argv) >= 4:
+    #     no_lags = int(sys.argv[3])
+    #
+    # # Estimate beta parameters
+    # train_portfolio_returns(filename, portfolio, no_lags)
 
-    if len(sys.argv) >= 3:
-        portfolio = sys.argv[2]
-
-    if len(sys.argv) >= 4:
-        no_lags = int(sys.argv[3])
-
-    # Estimate beta parameters
-    train_portfolio_returns(filename, portfolio, no_lags)
+    train_portfolio_returns('portfolio_size_daily', 'd1', 20)
+    train_portfolio_returns('portfolio_size_daily', 'd10', 20)
+    train_portfolio_returns('portfolio_value_daily', 'd1', 20)
+    train_portfolio_returns('portfolio_value_daily', 'd10', 20)
 
     # Terminate
     sql_loader.close()
