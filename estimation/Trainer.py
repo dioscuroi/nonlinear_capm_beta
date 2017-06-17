@@ -149,7 +149,7 @@ class Trainer:
 
         return result
 
-    def train(self, x_data, y_data, max_total_steps=int(1e7) + 1, learning_rate=0.1, x_tolerance = 1e-4, cost_tolerance=1e-4):
+    def train(self, x_data, y_data, max_total_steps=int(1e7) + 1, learning_rate=0.1, x_tolerance=1e-6, cost_tolerance=1e-6):
         """train
         """
 
