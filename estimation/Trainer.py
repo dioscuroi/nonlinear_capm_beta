@@ -6,7 +6,7 @@ import tensorflow as tf
 class Trainer:
     """A simple class to run machine learning"""
 
-    def __init__(self, depth=2, width=1, no_inputs=21, zero_init=False):
+    def __init__(self, depth=2, width=1, no_inputs=21, zero_init=True):
         """__init__
         """
 
@@ -52,6 +52,7 @@ class Trainer:
         # output values to be saved after computation
         self.cost = None
         self.rmse = None
+        self.sse = None
         self.r2 = None
 
     def run_ols_regression(self, x_data, y_data):
@@ -124,6 +125,30 @@ class Trainer:
 
         return [X, model, w, b, l]
 
+    def compute_sse(self, x_data, y_data):
+        """compute_sse
+
+        SSE: sum of squared errors
+        """
+
+        # define the model and SSE
+        tf.reset_default_graph()
+
+        Y = tf.placeholder(tf.float64, name='portfolio_returns')
+
+        [X, model, tf_w, tf_b, tf_l] = self.build_a_tree()
+
+        sse = tf.reduce_sum(tf.square(Y - model))
+
+        init = tf.global_variables_initializer()
+
+        sess = tf.Session()
+        sess.run(init)
+
+        result = sess.run(sse, feed_dict={X: x_data, Y: y_data})
+
+        return result
+
     def train(self, x_data, y_data, max_total_steps=int(1e7) + 1, learning_rate=0.1, x_tolerance = 1e-4, cost_tolerance=1e-4):
         """train
         """
@@ -195,6 +220,11 @@ class Trainer:
             print("The parameters are already optimized. No need to train anymore.")
             print("")
 
+            self.cost = sess.run(cost, feed_dict={X: x_data, Y: y_data})
+            self.rmse = sess.run(rmse, feed_dict={X: x_data, Y: y_data})
+            self.sse = sess.run(sse1, feed_dict={X: x_data, Y: y_data})
+            self.r2 = sess.run(r2, feed_dict={X: x_data, Y: y_data})
+
             return self.flush_params_to_dict()
 
         print("Training will start at the learning rate of {:4e}".format(learning_rate))
@@ -230,9 +260,10 @@ class Trainer:
         print("")
         print("Training is completed..")
 
-        self.cost  = sess.run(cost, feed_dict={X: x_data, Y: y_data})
-        self.rmse  = sess.run(rmse, feed_dict={X: x_data, Y: y_data})
-        self.r2    = sess.run(r2,   feed_dict={X: x_data, Y: y_data})
+        self.cost = sess.run(cost, feed_dict={X: x_data, Y: y_data})
+        self.rmse = sess.run(rmse, feed_dict={X: x_data, Y: y_data})
+        self.sse  = sess.run(sse1, feed_dict={X: x_data, Y: y_data})
+        self.r2   = sess.run(r2,   feed_dict={X: x_data, Y: y_data})
 
         print("({})".format(datetime.datetime.now()))
         print("Cost in the end: {}, RMSE: {:.4f}, R2: {:.3f}".format(self.cost, self.rmse, self.r2))
