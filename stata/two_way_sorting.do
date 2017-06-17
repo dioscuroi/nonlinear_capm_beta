@@ -20,6 +20,7 @@ use beta_stats_roll_lag20, clear
 
 * need to choose optimal filtering conditions here
 drop if no_obs < 100
+keep if rank <= 500
 
 
 * drop outliers
