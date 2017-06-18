@@ -80,7 +80,7 @@ def plot_cum_beta_helper(filename, portfolio, id, param):
     del trainer
 
     # draw the cumulative beta graph using pyplot
-    plt.figure(figsize=(6,3))
+    plt.figure(figsize=(7,3))
 
     plt.plot(mktrf, output_beta[:,0], 'r.', label='cum.beta.0')
     plt.plot(mktrf, output_beta[:,5], 'g--', label='cum.beta.5')
@@ -91,8 +91,10 @@ def plot_cum_beta_helper(filename, portfolio, id, param):
 
     if str.find(filename, 'value') >= 0:
         plt.yticks(np.arange(0.8,2.01,0.2))
-    else:
-        plt.yticks(np.arange(0.7,2.51,0.3))
+    elif str.find(filename, 'size') >= 0:
+        plt.yticks(np.arange(0.5,2.51,0.5))
+    elif str.find(filename, 'ff3factors') >= 0:
+        plt.yticks(np.arange(-.4, .61, 0.2))
 
     plt.savefig('outputs/plot_cum_beta_{}.png'.format(plot_title))
     plt.close()
@@ -107,10 +109,12 @@ if __name__ == "__main__":
 
     sql_loader = DataLoader(connect=True)
 
-    plot_cum_beta('portfolio_size_daily', 'd1')
-    plot_cum_beta('portfolio_size_daily', 'd10')
-    plot_cum_beta('portfolio_value_daily', 'd1')
-    plot_cum_beta('portfolio_value_daily', 'd10')
+    # plot_cum_beta('portfolio_size_daily', 'd1')
+    # plot_cum_beta('portfolio_size_daily', 'd10')
+    # plot_cum_beta('portfolio_value_daily', 'd1')
+    # plot_cum_beta('portfolio_value_daily', 'd10')
+
+    plot_cum_beta('ff3factors_daily', None)
 
     sql_loader.close()
 

@@ -11,7 +11,7 @@ from DataLoader import DataLoader
 from nonlinear_capm_beta.figures.plot_cum_beta import plot_cum_beta
 
 
-def train_portfolio_returns(filename, portfolio, no_lags):
+def train_portfolio_returns(filename, portfolio, no_lags, zero_init=True):
 
     print("*************************************************")
     print(" Train Portfolio Returns")
@@ -45,15 +45,15 @@ def train_portfolio_returns(filename, portfolio, no_lags):
     # Iterate for portfolios
     if portfolio is None:
         for col in df_portfolios.columns[1:]:
-            train_portfolio_helper(filename, df_portfolios[['date', col]], df_markets)
+            train_portfolio_helper(filename, df_portfolios[['date', col]], df_markets, zero_init)
 
     else:
-        train_portfolio_helper(filename, df_portfolios[['date', portfolio]], df_markets)
+        train_portfolio_helper(filename, df_portfolios[['date', portfolio]], df_markets, zero_init)
 
     return
 
 
-def train_portfolio_helper(filename, pf_returns, mktrf):
+def train_portfolio_helper(filename, pf_returns, mktrf, zero_init):
 
     # drop missing returns
     idx_missing = (pf_returns.iloc[:, 1] < -99)
@@ -91,7 +91,6 @@ def train_portfolio_helper(filename, pf_returns, mktrf):
 
     # Initialize the trainer
     max_retries = 5
-    zero_init = True
 
     for attempt_id in range(max_retries):
 
@@ -136,6 +135,8 @@ def train_portfolio_helper(filename, pf_returns, mktrf):
     beta_convexity = (beta20[0] + beta20[-1]) / 2 - beta20[int((len(beta20) - 1) / 2)]
 
     # Save the results to SQL server
+    sql_loader = DataLoader(connect=True)
+
     query = """
         select max(id)
         from beta_portfolios
@@ -164,16 +165,13 @@ def train_portfolio_helper(filename, pf_returns, mktrf):
         beta_average, beta_delay, beta_convexity))
     print("")
 
+    sql_loader.close()
+
     return
 
 
-# Global variables
-sql_loader = None
-
 # call the main function when called directly
 if __name__ == "__main__":
-
-    sql_loader = DataLoader(connect=True)
 
     # # default parameters
     # filename = 'portfolio_size_daily'
@@ -193,12 +191,13 @@ if __name__ == "__main__":
     # # Estimate beta parameters
     # train_portfolio_returns(filename, portfolio, no_lags)
 
-    train_portfolio_returns('portfolio_size_daily', 'd1', 20)
-    train_portfolio_returns('portfolio_size_daily', 'd10', 20)
-    train_portfolio_returns('portfolio_value_daily', 'd1', 20)
-    train_portfolio_returns('portfolio_value_daily', 'd10', 20)
+    # train_portfolio_returns('portfolio_size_daily', 'd1', 20)
+    # train_portfolio_returns('portfolio_size_daily', 'd10', 20)
+    # train_portfolio_returns('portfolio_value_daily', 'd1', 20)
+    # train_portfolio_returns('portfolio_value_daily', 'd10', 20)
+
+    train_portfolio_returns('ff3factors_daily', 'smb', 20)
+    train_portfolio_returns('ff3factors_daily', 'hml', 20)
 
     # Terminate
-    sql_loader.close()
-
     print('** beep **\a')
