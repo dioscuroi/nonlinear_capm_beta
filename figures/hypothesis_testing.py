@@ -140,6 +140,7 @@ def print_F_statistics(usse, rsse, no_obs, no_restrictions):
     pval = 1 - f.cdf(F, no_restrictions, no_obs - no_restrictions)
 
     print("Restricted SSE: {:.2f}".format(rsse))
+    print("# restrictions: {:d}".format(no_restrictions))
     print("F-stat: {:.3f}".format(F))
     print("p-value: {:.2e}".format(pval))
 

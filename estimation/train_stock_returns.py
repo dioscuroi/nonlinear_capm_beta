@@ -20,8 +20,8 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
     print("***********************************")
 
     no_lags = 20
-    no_years = 5
-    min_no_obs = 500
+    no_years = 20
+    min_no_obs = 4000
 
     loader = DataLoader(connect=True)
 
@@ -96,7 +96,7 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
 
                 trainer.run_ols_regression(x_data, y_data)
 
-                params = trainer.train(x_data, y_data, x_tolerance=1e-2, cost_tolerance=1e-3)
+                params = trainer.train(x_data, y_data, x_tolerance=1e-3, cost_tolerance=1e-4)
 
                 del trainer
 
@@ -169,7 +169,7 @@ if __name__ == "__main__":
         max_rank = int(sys.argv[3])
 
     else:
-        year_from = 1930
+        year_from = 1945
         year_to = 2015
         max_rank = 500
 
