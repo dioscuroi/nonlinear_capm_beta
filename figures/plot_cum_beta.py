@@ -86,15 +86,17 @@ def plot_cum_beta_helper(filename, portfolio, id, param):
     plt.plot(mktrf, output_beta[:,5], 'g--', label='cum.beta.5')
     plt.plot(mktrf, output_beta[:,20], 'k-', label='cum.beta.20')
 
-    # plt.title(plot_title)
-    plt.legend(loc='upper center')
-
     if str.find(filename, 'value') >= 0:
         plt.yticks(np.arange(0.8,2.01,0.2))
     elif str.find(filename, 'size') >= 0:
         plt.yticks(np.arange(0.5,2.51,0.5))
     elif str.find(filename, 'ff3factors') >= 0:
         plt.yticks(np.arange(-.4, .61, 0.2))
+
+    # plt.title(plot_title)
+    plt.legend(loc='upper center')
+    plt.grid()
+    plt.tight_layout()
 
     plt.savefig('outputs/plot_cum_beta_{}.png'.format(plot_title))
     plt.close()
@@ -109,10 +111,10 @@ if __name__ == "__main__":
 
     sql_loader = DataLoader(connect=True)
 
-    # plot_cum_beta('portfolio_size_daily', 'd1')
-    # plot_cum_beta('portfolio_size_daily', 'd10')
-    # plot_cum_beta('portfolio_value_daily', 'd1')
-    # plot_cum_beta('portfolio_value_daily', 'd10')
+    plot_cum_beta('portfolio_size_daily', 'd1')
+    plot_cum_beta('portfolio_size_daily', 'd10')
+    plot_cum_beta('portfolio_value_daily', 'd1')
+    plot_cum_beta('portfolio_value_daily', 'd10')
 
     plot_cum_beta('ff3factors_daily', None)
 
