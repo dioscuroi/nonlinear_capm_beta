@@ -79,6 +79,10 @@ def plot_cum_beta_helper(filename, portfolio, id, param):
 
     del trainer
 
+    print("average cum.beta.0 : {:.4f}".format(np.mean(output_beta[:,0])))
+    print("average cum.beta.5 : {:.4f}".format(np.mean(output_beta[:,5])))
+    print("average cum.beta.20: {:.4f}".format(np.mean(output_beta[:,20])))
+
     # draw the cumulative beta graph using pyplot
     plt.figure(figsize=(7,3))
 
