@@ -87,7 +87,7 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
             x_data = x_data.as_matrix()
 
             # Initialize the trainer
-            max_retries = 3
+            max_retries = 4
             zero_init = True
 
             for attempt_id in range(max_retries):
@@ -109,11 +109,13 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
                 print("Parameters are overfitted. Let's try again.")
                 print("")
 
-            # if parameters are still overfitted, replace parameters with OLS coefficients
+            # Parameters are still overfitted. Let's give up this firm.
             if params is None:
-                trainer = Trainer(depth=2, width=1, no_inputs=no_lags + 1, zero_init=True)
-                trainer.run_ols_regression(x_data, y_data)
-                params = trainer.flush_params_to_dict()
+
+                print("Parameters are still overfitted. Let's give up this firm.")
+                loader.save_stock_params_only_no_obs(year, permno, no_obs)
+
+                continue
 
             # compute beta
             beta = compute_beta(param=params, freq='daily', no_lags=no_lags)

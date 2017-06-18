@@ -55,11 +55,8 @@ def check_if_overfitted_by_beta(beta):
     beta_stdev = np.std(beta20)
 
     # OLS is actually optimal for several stocks -- not sure now..
-    if beta_stdev <= 1e-12:
+    if beta_stdev <= 1e-8:
         return True
-
-    if beta_stdev == 0:
-        return False
 
     normalized = (beta20 - beta_average) / beta_stdev
 
