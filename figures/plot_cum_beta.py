@@ -86,9 +86,9 @@ def plot_cum_beta_helper(filename, portfolio, id, param):
     # draw the cumulative beta graph using pyplot
     plt.figure(figsize=(7,3))
 
-    plt.plot(mktrf, output_beta[:,0], 'r.', label='cum.beta.0')
-    plt.plot(mktrf, output_beta[:,5], 'g--', label='cum.beta.5')
-    plt.plot(mktrf, output_beta[:,20], 'k-', label='cum.beta.20')
+    plt.plot(mktrf, output_beta[:,0], 'r.', label='cumulative beta over 0 day')
+    plt.plot(mktrf, output_beta[:,5], 'g--', label='cumulative beta over 5 days')
+    plt.plot(mktrf, output_beta[:,20], 'k-', label='cumulative beta over 20 days')
 
     if str.find(filename, 'value') >= 0:
         plt.yticks(np.arange(0.8,2.01,0.2))
