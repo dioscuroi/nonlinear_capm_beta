@@ -10,18 +10,24 @@ from Trainer import Trainer
 from DataLoader import DataLoader
 
 
-def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
+def train_stock_returns(freq='monthly', year_from=1930, year_to=2016, max_rank=500):
 
     print("***********************************")
     print(" Train Stock Returns")
+    print(" freq: {}".format(freq))
     print(" year_from: {}".format(year_from))
     print(" year_to: {}".format(year_to))
     print(" max_rank: {}".format(max_rank))
     print("***********************************")
 
-    no_lags = 20
-    no_years = 20
-    min_no_obs = 4000
+    if freq == 'daily':
+        no_lags = 20
+        no_years = 5
+        min_no_obs = 4000
+    else:
+        no_lags = 1
+        no_years = 5
+        min_no_obs = 50
 
     loader = DataLoader(connect=True)
 
@@ -39,9 +45,9 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
         date_to = date(year, 12, 31)
 
         print("Loading market returns...")
-        mktrf = loader.load_market_returns('daily', no_lags=no_lags, date_from=date_from, date_to=date_to)
+        mktrf = loader.load_market_returns(freq, no_lags=no_lags, date_from=date_from, date_to=date_to)
 
-        permno_list = loader.load_target_permno_list(year, max_rank)
+        permno_list = loader.load_target_permno_list(freq, year, max_rank)
 
         if permno_list is None:
             print("No observations are left in this year. Let's move on to the next year.")
@@ -57,13 +63,13 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
             print(" year: {}, permno: {} ({}/{})".format(year, permno, i+1, len(permno_list)))
             print("*****************************************")
 
-            if not loader.check_if_still_empty(year, permno):
+            if not loader.check_if_still_empty(freq, year, permno):
                 continue
 
             t_start = time.time()
 
             print("Loading stock returns...")
-            stock_rets = loader.load_stock_returns(permno, date_from, date_to)
+            stock_rets = loader.load_stock_returns(freq, permno, date_from, date_to)
 
             if stock_rets is None:
                 loader.save_stock_params_only_no_obs(year, permno, 0)
@@ -100,7 +106,7 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
 
                 del trainer
 
-                if not check_if_overfitted_by_param(params, freq="daily", no_lags=no_lags):
+                if not check_if_overfitted_by_param(params, freq, no_lags=no_lags):
                     break
 
                 params = None
@@ -113,12 +119,12 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
             if params is None:
 
                 print("Parameters are still overfitted. Let's give up this firm.")
-                loader.save_stock_params_only_no_obs(year, permno, no_obs)
+                loader.save_stock_params_only_no_obs(freq, year, permno, no_obs)
 
                 continue
 
             # compute beta
-            beta = compute_beta(param=params, freq='daily', no_lags=no_lags)
+            beta = compute_beta(params, freq, no_lags)
 
             assert(not check_if_overfitted_by_beta(beta))
 
@@ -130,7 +136,7 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
             beta_convexity = (beta20[0] + beta20[-1]) / 2 - beta20[int((len(beta20) - 1) / 2)]
 
             query = """
-              update beta_stocks_rolling
+              update beta_stocks_{}
               set no_obs = {},
                 sample_from = '{}',
                 sample_to = '{}',
@@ -139,7 +145,7 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
                 beta_delay = {},
                 beta_convexity = {}
               where year = {} and permno = {}
-            """.format(no_obs, date_from, date_to,
+            """.format(freq, no_obs, date_from, date_to,
                        json.dumps(params), beta_average, beta_delay, beta_convexity,
                        year, permno)
 
@@ -165,16 +171,15 @@ def train_stock_returns(year_from=1930, year_to=2016, max_rank=500):
 # call the main function when called directly
 if __name__ == "__main__":
 
-    if len(sys.argv) == 4:
-        year_from = int(sys.argv[1])
-        year_to = int(sys.argv[2])
-        max_rank = int(sys.argv[3])
+    if len(sys.argv) == 5:
+        freq = sys.argv[1]
+        year_from = int(sys.argv[2])
+        year_to = int(sys.argv[3])
+        max_rank = int(sys.argv[4])
+
+        train_stock_returns(freq, year_from, year_to, max_rank)
 
     else:
-        year_from = 1945
-        year_to = 2015
-        max_rank = 500
-
-    train_stock_returns(year_from, year_to, max_rank)
+        train_stock_returns()
 
     print('** beep **\a')

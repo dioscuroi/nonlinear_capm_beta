@@ -73,10 +73,12 @@ class DataLoader:
         """load_market_returns
         """
 
-        query = 'select date, mktrf, rf from FamaFrench_3factors'
-
         if freq == 'daily':
-            query += '_daily'
+            table = 'FamaFrench_3factors_daily'
+        else:
+            table = 'FamaFrench_3factors_monthly'
+
+        query = 'select date, mktrf, rf from {}'.format(table)
 
         if (date_from is not None) & (date_to is not None):
             query += ' where date >= "{}" and date <= "{}"'.format(date_from, date_to)
@@ -181,16 +183,16 @@ class DataLoader:
             cur.execute(query)
             self.connection.commit()
 
-    def load_target_permno_list(self, year, max_rank):
+    def load_target_permno_list(self, freq, year, max_rank):
         """load_permno_list
         """
 
         query = """
             select year, rank, permno
-            from beta_stocks_rolling
+            from beta_stocks_{}
             where year = {} and rank <= {} and no_obs is null
             order by rank
-        """.format(year, max_rank)
+        """.format(freq, year, max_rank)
 
         with self.connection.cursor() as cur:
             cur.execute(query)
@@ -241,15 +243,15 @@ class DataLoader:
         else:
             return None
 
-    def check_if_still_empty(self, year, permno):
+    def check_if_still_empty(self, freq, year, permno):
         """check_if_still_empty
         """
 
         query = """
             select parameters
-            from beta_stocks_rolling
+            from beta_stocks_{}
             where year = {} and permno = {}
-        """.format(year, permno)
+        """.format(freq, year, permno)
 
         with self.connection.cursor() as cur:
             cur.execute(query)
@@ -257,15 +259,15 @@ class DataLoader:
 
         return results[0]['parameters'] is None
 
-    def load_stock_returns(self, permno, date_from=None, date_to=None):
+    def load_stock_returns(self, freq, permno, date_from=None, date_to=None):
         """load_stock_returns
         """
 
         query = """
             select date, ret
-            from CRSP_stocks_daily
+            from CRSP_stocks_{}
             where permno = {} and ret is not null
-        """.format(permno).strip()
+        """.format(freq, permno).strip()
 
         if date_from is not None:
             query = query + " and date >= '{}'".format(date_from)
@@ -282,15 +284,15 @@ class DataLoader:
         else:
             return None
 
-    def save_stock_params_only_no_obs(self, year, permno, no_obs):
+    def save_stock_params_only_no_obs(self, freq, year, permno, no_obs):
         """save_stock_params_only_no_obs
         """
 
         query = """
-          update beta_stocks_rolling
+          update beta_stocks_{}
           set no_obs = {}
           where year = {} and permno = {}
-        """.format(no_obs, year, permno)
+        """.format(freq, no_obs, year, permno)
 
         with self.connection.cursor() as cur:
             cur.execute(query)
