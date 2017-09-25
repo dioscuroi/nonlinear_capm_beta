@@ -72,7 +72,7 @@ def train_stock_returns(freq='monthly', year_from=1930, year_to=2016, max_rank=5
             stock_rets = loader.load_stock_returns(freq, permno, date_from, date_to)
 
             if stock_rets is None:
-                loader.save_stock_params_only_no_obs(year, permno, 0)
+                loader.save_stock_params_only_no_obs(freq, year, permno, 0)
                 continue
 
             merged = pd.merge(mktrf, stock_rets, on='date')
@@ -81,7 +81,7 @@ def train_stock_returns(freq='monthly', year_from=1930, year_to=2016, max_rank=5
 
             if no_obs < min_no_obs:
                 print("Skip this stock due to the lack of observations (obs:{})".format(no_obs))
-                loader.save_stock_params_only_no_obs(year, permno, no_obs)
+                loader.save_stock_params_only_no_obs(freq, year, permno, no_obs)
 
                 continue
 
