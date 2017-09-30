@@ -1,25 +1,36 @@
-* long_short_analysis
+* univariate_risk_premium
 
 clear
 set more off
+disp _newline(100)
 
 local options = "stats(coef tstat) bdec(3) tdec(3)"
 
 cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 
-!rm long_short_analysis*.txt
+!rm univariate_risk_premium*.txt
 
+
+****************************************************
+* Prepare data
+****************************************************
 
 * load beta statistics
-insheet using "beta_stats.csv", clear
+use beta_stats_roll_lag20, clear
+
+* need to choose optimal filtering conditions here
+keep if rank <= 1000
 
 * drop outliers
 foreach beta of varlist beta_average beta_delay beta_convexity {
+
+	bysort year: egen cut1 = pctile(`beta'), p(1)
+	bysort year: egen cut2 = pctile(`beta'), p(99)
 	
-	_pctile `beta', p(1 99)
+	replace `beta' = . if `beta' < cut1
+	replace `beta' = . if `beta' > cut2
 	
-	replace `beta' = . if `beta' < r(r1)
-	replace `beta' = . if `beta' > r(r2)
+	drop cut1 cut2
 }
 
 drop if beta_average == .
@@ -29,6 +40,13 @@ drop if beta_convexity == .
 * print the summary of beta
 summarize beta_*, detail
 
+corr beta_*
+
+
+****************************************************
+* Portfolio formation
+****************************************************
+
 * form portfolios
 foreach beta of varlist beta_average beta_delay beta_convexity {
 
@@ -37,18 +55,22 @@ foreach beta of varlist beta_average beta_delay beta_convexity {
 	
 	gen pid_`beta' = .
 	replace pid_`beta' = 1 if (`beta' < p33)
-	replace pid_`beta' = 2 if (`beta' >= p33) & (`beta' < p67)
-	replace pid_`beta' = 3 if (`beta' >= p67)
+	replace pid_`beta' = 2 if (`beta' >= p33) & (`beta' <= p67)
+	replace pid_`beta' = 3 if (`beta' > p67)
 	
 	drop p33 p67
 }
 
 
+****************************************************
+* Compute portfolio returns
+****************************************************
+
 * merge with stock returns
 gen date = ym(year, 12)
 format %tm date
 
-merge 1:1 permno date using "/Users/dioscuroi/Research Data/Stocks/CRSP stock returns/stocks_monthly_filtered.dta", nogen
+merge 1:1 permno date using "/Users/dioscuroi/OneDrive - UNSW/Research Data/Stocks/CRSP stock returns/stocks_monthly_filtered.dta", nogen
 
 gen marcap = prc * shrout
 
@@ -108,10 +130,15 @@ merge 1:1 date using temp_portfolio_returns_beta_convexity, nogen
 save temp_portfolio_returns_combined, replace
 
 
+****************************************************
 * print regression results
+****************************************************
+
 use temp_portfolio_returns_combined, clear
 
-merge 1:1 date using "/Users/dioscuroi/Research Data/Stocks/Fama_French/ff3factors_monthly.dta", nogen
+merge 1:1 date using "/Users/dioscuroi/OneDrive - UNSW/Research Data/Stocks/Fama_French/ff3factors_monthly.dta", nogen
+
+tsset date
 
 foreach beta in beta_average beta_delay beta_convexity {
 
@@ -123,17 +150,11 @@ foreach beta in beta_average beta_delay beta_convexity {
 		gen exret3 = `weight'r_`beta'3 * 100 - rf
 
 		forvalues i = 1/3 {
-			reg exret`i' mktrf
-			outreg2 using "long_short_analysis_`beta'_`weight'_CAPM.txt", `option'
+			reg exret`i'
+			outreg2 using "univariate_risk_premium_`beta'_`weight'_raw.txt", `options' drop(exret`i')
 			
-			reg exret`i' mktrf smb hml
-			outreg2 using "long_short_analysis_`beta'_`weight'_FF3.txt", `option'
-			
-			reg exret`i' mktrf if date >= ym(1950,1)
-			outreg2 using "long_short_analysis_`beta'_`weight'_CAPM_since_1950.txt", `option'
-			
-			reg exret`i' mktrf smb hml if date >= ym(1950,1)
-			outreg2 using "long_short_analysis_`beta'_`weight'_FF3_since_1950.txt", `option'
+			reg exret`i' mktrf L.mktrf
+			outreg2 using "univariate_risk_premium_`beta'_`weight'_CAPM.txt", `options' drop(exret`i')
 		}
 	
 		drop exret1 exret2 exret3
