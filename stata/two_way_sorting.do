@@ -17,6 +17,7 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 
 * load beta statistics
 use beta_stats_roll_lag20, clear
+*use beta_stats_monthly, clear
 
 * need to choose optimal filtering conditions here
 *drop if no_obs < 100
@@ -75,8 +76,8 @@ foreach beta of varlist beta_convexity beta_delay {
 }
 
 * print summary statistics for each portfolio
-table pid_beta_convexity, c(mean beta_average mean beta_convexity)
-table pid_beta_delay, c(mean beta_average mean beta_delay)
+table pid_beta_delay, c(mean beta_average sd beta_average mean beta_delay sd beta_delay)
+table pid_beta_convexity, c(mean beta_average sd beta_average mean beta_convexity sd beta_convexity)
 
 
 
@@ -168,22 +169,29 @@ foreach beta in beta_delay beta_convexity {
 			disp " `beta', `weight', `cond' "
 			disp "******************************************************"
 	
-			matrix raw_exret 		= (0,0,0,0 \ 0,0,0,0 \ 0,0,0,0)
+			matrix raw_exret 		= (0,0,0,0 \ 0,0,0,0 \ 0,0,0,0 \ 0,0,0,.)
 			matrix raw_exret_tstat  = raw_exret
 			matrix capm_alpha_coef  = raw_exret
 			matrix capm_alpha_tstat = raw_exret
 			matrix ff3_alpha_coef   = raw_exret
 			matrix ff3_alpha_tstat  = raw_exret
 	
-			forvalues i = 1/3 {
+			forvalues i = 1/4 {
 				forvalues j = 1/4 {
 				
-					if `j' <= 3 {
+					if `i' < 4 & `j' < 4 {
 						quietly gen exret = `weight'r_`beta'`i'`j' * 100 - rf
 					}
-					else {
+					else if `i' < 4 & `j' == 4 {
 						quietly gen exret = (`weight'r_`beta'`i'3 - `weight'r_`beta'`i'1) * 100
 					}
+					else if `i' == 4 & `j' < 4 {
+						quietly gen exret = (`weight'r_`beta'3`j' - `weight'r_`beta'1`j') * 100
+					}
+					else if `i' == 4 & `j' == 4 {
+						continue
+					}
+				
 			
 					* raw excess returns
 *					quietly summarize exret `cond'
@@ -199,12 +207,12 @@ foreach beta in beta_delay beta_convexity {
 					matrix capm_alpha_tstat[`i',`j'] = coef[1,2] / sqrt(cov[2,2])
 			
 					* FF3 alpha
-					quietly reg exret mktrf L.mktrf smb hml `cond'
-					matrix coef = e(b)
-					matrix cov = e(V)
+*					quietly reg exret mktrf L.mktrf smb hml `cond'
+*					matrix coef = e(b)
+*					matrix cov = e(V)
 			
-					matrix ff3_alpha_coef[`i',`j'] = coef[1,4]
-					matrix ff3_alpha_tstat[`i',`j'] = coef[1,4] / sqrt(cov[4,4])
+*					matrix ff3_alpha_coef[`i',`j'] = coef[1,4]
+*					matrix ff3_alpha_tstat[`i',`j'] = coef[1,4] / sqrt(cov[4,4])
 			
 					drop exret
 				}
@@ -214,8 +222,8 @@ foreach beta in beta_delay beta_convexity {
 *			matrix list raw_exret_tstat
 			matrix list capm_alpha_coef
 			matrix list capm_alpha_tstat
-			matrix list ff3_alpha_coef
-			matrix list ff3_alpha_tstat
+*			matrix list ff3_alpha_coef
+*			matrix list ff3_alpha_tstat
 		}
 	}
 }
