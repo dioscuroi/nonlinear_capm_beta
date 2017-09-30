@@ -19,8 +19,8 @@ cd "/Users/dioscuroi/GitHub/nonlinear_capm_beta/stata"
 use beta_stats_roll_lag20, clear
 
 * need to choose optimal filtering conditions here
-drop if no_obs < 100
-keep if rank <= 500
+*drop if no_obs < 100
+keep if rank <= 1000
 
 
 * drop outliers
@@ -152,6 +152,8 @@ use temp_portfolio_returns_combined, clear
 
 merge 1:1 date using "/Users/dioscuroi/OneDrive - UNSW/Research Data/Stocks/Fama_French/ff3factors_monthly.dta", nogen
 
+tsset date
+
 foreach beta in beta_delay beta_convexity {
 
 *	foreach weight in ew vw {
@@ -162,9 +164,9 @@ foreach beta in beta_delay beta_convexity {
 	
 			disp ""
 			disp ""
-			disp "****************************************************************"
+			disp "******************************************************"
 			disp " `beta', `weight', `cond' "
-			disp "****************************************************************"
+			disp "******************************************************"
 	
 			matrix raw_exret 		= (0,0,0,0 \ 0,0,0,0 \ 0,0,0,0)
 			matrix raw_exret_tstat  = raw_exret
@@ -184,12 +186,12 @@ foreach beta in beta_delay beta_convexity {
 					}
 			
 					* raw excess returns
-					quietly summarize exret `cond'
-					matrix raw_exret[`i',`j'] = r(mean)
-					matrix raw_exret_tstat[`i',`j'] = r(mean) / r(sd) * sqrt(r(N))
+*					quietly summarize exret `cond'
+*					matrix raw_exret[`i',`j'] = r(mean)
+*					matrix raw_exret_tstat[`i',`j'] = r(mean) / r(sd) * sqrt(r(N))
 			
 					* CAPM alpha
-					quietly reg exret mktrf `cond'
+					quietly reg exret mktrf L.mktrf `cond'
 					matrix coef = e(b)
 					matrix cov = e(V)
 			
@@ -197,7 +199,7 @@ foreach beta in beta_delay beta_convexity {
 					matrix capm_alpha_tstat[`i',`j'] = coef[1,2] / sqrt(cov[2,2])
 			
 					* FF3 alpha
-					quietly reg exret mktrf smb hml `cond'
+					quietly reg exret mktrf L.mktrf smb hml `cond'
 					matrix coef = e(b)
 					matrix cov = e(V)
 			
@@ -208,8 +210,8 @@ foreach beta in beta_delay beta_convexity {
 				}
 			}
 		
-			matrix list raw_exret
-			matrix list raw_exret_tstat
+*			matrix list raw_exret
+*			matrix list raw_exret_tstat
 			matrix list capm_alpha_coef
 			matrix list capm_alpha_tstat
 			matrix list ff3_alpha_coef
