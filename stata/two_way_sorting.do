@@ -157,11 +157,11 @@ tsset date
 
 foreach beta in beta_delay beta_convexity {
 
-*	foreach weight in ew vw {
-	foreach weight in vw {
+	foreach weight in ew vw {
+*	foreach weight in vw {
 	
-*		foreach cond in "" "if date >= ym(1950,1)" {
 		foreach cond in "" {
+*		foreach cond in "" "if date < ym(1950,1)" "if date >= ym(1950,1)" {
 	
 			disp ""
 			disp ""
