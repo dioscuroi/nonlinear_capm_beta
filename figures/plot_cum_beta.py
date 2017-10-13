@@ -47,14 +47,14 @@ def plot_cum_beta_helper(filename, portfolio, id, param):
 
     print("Processing {}".format(plot_title))
 
-    # fix no_lags to 20 for the moment
-    no_lags = 20
-
-    # prepare the x-axis to draw beta
+    # no_lags = 20 for daily returns, = 1 for monthly returns
     if str.find(filename, 'daily') >= 0:
+        no_lags = 20
         mktrf = np.arange(-3, 3 + 0.001, .1)
+
     else:
-        mktrf = np.arange(-20, 20 + 0.001, .2)
+        no_lags = 1
+        mktrf = np.arange(-20, 20 + 0.01, .2)
 
     # Beta plot is drawn on the basis that RmRf is a vector of equal values
     x_data = np.zeros([len(mktrf), no_lags + 1])
@@ -79,23 +79,37 @@ def plot_cum_beta_helper(filename, portfolio, id, param):
 
     del trainer
 
-    print("average cum.beta.0 : {:.4f}".format(np.mean(output_beta[:,0])))
-    print("average cum.beta.5 : {:.4f}".format(np.mean(output_beta[:,5])))
-    print("average cum.beta.20: {:.4f}".format(np.mean(output_beta[:,20])))
-
     # draw the cumulative beta graph using pyplot
     plt.figure(figsize=(7,3))
 
-    plt.plot(mktrf, output_beta[:,0], 'r.', label='cumulative beta over 0 day')
-    plt.plot(mktrf, output_beta[:,5], 'g--', label='cumulative beta over 5 days')
-    plt.plot(mktrf, output_beta[:,20], 'k-', label='cumulative beta over 20 days')
+    if no_lags >= 20:
+        print("average cum.beta.0 : {:.4f}".format(np.mean(output_beta[:,0])))
+        print("average cum.beta.5 : {:.4f}".format(np.mean(output_beta[:,5])))
+        print("average cum.beta.20: {:.4f}".format(np.mean(output_beta[:,20])))
 
-    if str.find(filename, 'value') >= 0:
-        plt.yticks(np.arange(0.8,2.01,0.2))
-    elif str.find(filename, 'size') >= 0:
-        plt.yticks(np.arange(0.5,2.51,0.5))
-    elif str.find(filename, 'ff3factors') >= 0:
-        plt.yticks(np.arange(-.4, .61, 0.2))
+        plt.plot(mktrf, output_beta[:, 0], 'r.', label='cumulative beta over 0 day')
+        plt.plot(mktrf, output_beta[:, 5], 'g--', label='cumulative beta over 5 days')
+        plt.plot(mktrf, output_beta[:, 20], 'k-', label='cumulative beta over 20 days')
+
+        if str.find(filename, 'value') >= 0:
+            plt.yticks(np.arange(0.8, 2.01, 0.2))
+        elif str.find(filename, 'size') >= 0:
+            plt.yticks(np.arange(0.5, 2.51, 0.5))
+        elif str.find(filename, 'ff3factors') >= 0:
+            plt.yticks(np.arange(-.4, .61, 0.2))
+    else:
+        print("average cum.beta.0 : {:.4f}".format(np.mean(output_beta[:,0])))
+        print("average cum.beta.1 : {:.4f}".format(np.mean(output_beta[:,1])))
+
+        plt.plot(mktrf, output_beta[:, 0], 'r.', label='cumulative beta over 0 month')
+        plt.plot(mktrf, output_beta[:, 1], 'k-', label='cumulative beta over 1 month')
+
+        if str.find(filename, 'value') >= 0:
+            plt.yticks(np.arange(0.8, 2.01, 0.2))
+        elif str.find(filename, 'size') >= 0:
+            plt.yticks(np.arange(0.5, 4.01, 0.5))
+        elif str.find(filename, 'ff3factors') >= 0:
+            plt.yticks(np.arange(-.4, .61, 0.2))
 
     # plt.title(plot_title)
     plt.legend(loc='upper center')
@@ -115,12 +129,17 @@ if __name__ == "__main__":
 
     sql_loader = DataLoader(connect=True)
 
-    plot_cum_beta('portfolio_size_daily', 'd1')
-    plot_cum_beta('portfolio_size_daily', 'd10')
-    plot_cum_beta('portfolio_value_daily', 'd1')
-    plot_cum_beta('portfolio_value_daily', 'd10')
+    # plot_cum_beta('portfolio_size_daily', 'd1')
+    # plot_cum_beta('portfolio_size_daily', 'd10')
+    # plot_cum_beta('portfolio_value_daily', 'd1')
+    # plot_cum_beta('portfolio_value_daily', 'd10')
+    #
+    # plot_cum_beta('ff3factors_daily', None)
 
-    plot_cum_beta('ff3factors_daily', None)
+    plot_cum_beta('portfolio_size', 'd1')
+    plot_cum_beta('portfolio_size', 'd10')
+    plot_cum_beta('portfolio_value', 'd1')
+    plot_cum_beta('portfolio_value', 'd10')
 
     sql_loader.close()
 
