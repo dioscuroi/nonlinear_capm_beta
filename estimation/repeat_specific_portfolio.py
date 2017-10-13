@@ -6,15 +6,13 @@ from train_portfolio_returns import train_portfolio_returns
 from nonlinear_capm_beta.figures.plot_cum_beta import plot_cum_beta
 
 
-def repeat_specific_portfolio(filename, portfolio, no_lags):
+def repeat_specific_portfolio(filename, portfolio, no_lags, no_repeats = 10):
 
     print("************************************************")
     print(" Repeat the Training of Portfolio Returns")
     print(" filename: {}".format(filename))
     print(" portfolio: {}".format(portfolio))
     print("************************************************")
-
-    no_repeats = 10
 
     for repeat_id in range(0, no_repeats):
 
@@ -30,6 +28,16 @@ def repeat_specific_portfolio(filename, portfolio, no_lags):
 # call the main function when called directly
 if __name__ == "__main__":
 
-    repeat_specific_portfolio('ff3factors_daily', 'smb', 20)
-    repeat_specific_portfolio('ff3factors_daily', 'hml', 20)
+    # parse parameters passed over from the command line
+    if len(sys.argv) == 4:
+        filename = sys.argv[1]
+        portfolio = sys.argv[2]
+        no_lags = int(sys.argv[3])
+
+    else:
+        filename = 'portfolio_size'
+        portfolio = 'd10'
+        no_lags = 1
+
+    repeat_specific_portfolio(filename, portfolio, no_lags)
 
