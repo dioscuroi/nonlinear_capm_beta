@@ -54,7 +54,7 @@ def plot_cum_beta_helper(filename, portfolio, id, param):
 
     else:
         no_lags = 1
-        mktrf = np.arange(-20, 20 + 0.01, .2)
+        mktrf = np.arange(-20, 20 + 0.001, 1)
 
     # Beta plot is drawn on the basis that RmRf is a vector of equal values
     x_data = np.zeros([len(mktrf), no_lags + 1])
@@ -80,12 +80,12 @@ def plot_cum_beta_helper(filename, portfolio, id, param):
     del trainer
 
     # draw the cumulative beta graph using pyplot
-    plt.figure(figsize=(7,3))
-
     if no_lags >= 20:
         print("average cum.beta.0 : {:.4f}".format(np.mean(output_beta[:,0])))
         print("average cum.beta.5 : {:.4f}".format(np.mean(output_beta[:,5])))
         print("average cum.beta.20: {:.4f}".format(np.mean(output_beta[:,20])))
+
+        plt.figure(figsize=(7, 3))
 
         plt.plot(mktrf, output_beta[:, 0], 'r.', label='cumulative beta over 0 day')
         plt.plot(mktrf, output_beta[:, 5], 'g--', label='cumulative beta over 5 days')
@@ -101,11 +101,13 @@ def plot_cum_beta_helper(filename, portfolio, id, param):
         print("average cum.beta.0 : {:.4f}".format(np.mean(output_beta[:,0])))
         print("average cum.beta.1 : {:.4f}".format(np.mean(output_beta[:,1])))
 
+        plt.figure(figsize=(3.5, 3))
+
         plt.plot(mktrf, output_beta[:, 0], 'r.', label='cumulative beta over 0 month')
         plt.plot(mktrf, output_beta[:, 1], 'k-', label='cumulative beta over 1 month')
 
         if str.find(filename, 'value') >= 0:
-            plt.yticks(np.arange(0.8, 2.01, 0.2))
+            plt.yticks(np.arange(0.5, 4.01, 0.5))
         elif str.find(filename, 'size') >= 0:
             plt.yticks(np.arange(0.5, 4.01, 0.5))
         elif str.find(filename, 'ff3factors') >= 0:
