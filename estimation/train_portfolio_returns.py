@@ -196,8 +196,13 @@ if __name__ == "__main__":
     # train_portfolio_returns('portfolio_value_daily', 'd1', 20)
     # train_portfolio_returns('portfolio_value_daily', 'd10', 20)
 
-    train_portfolio_returns('ff3factors_daily', 'smb', 20)
-    train_portfolio_returns('ff3factors_daily', 'hml', 20)
+    # train_portfolio_returns('ff3factors_daily', 'smb', 20)
+    # train_portfolio_returns('ff3factors_daily', 'hml', 20)
+
+    train_portfolio_returns('portfolio_size', 'd1', 1)
+    train_portfolio_returns('portfolio_size', 'd10', 1)
+    train_portfolio_returns('portfolio_value', 'd1', 1)
+    train_portfolio_returns('portfolio_value', 'd10', 1)
 
     # Terminate
     print('** beep **\a')
