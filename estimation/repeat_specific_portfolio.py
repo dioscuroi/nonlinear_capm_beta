@@ -17,7 +17,7 @@ def repeat_specific_portfolio(filename, portfolio, no_lags, no_repeats = 10):
     for repeat_id in range(0, no_repeats):
 
         print("")
-        print("==== Repeat ID: {}/{} ====".format(repeat_id, no_repeats))
+        print("==== Repeat ID: {}/{} ====".format(repeat_id + 1, no_repeats))
         print("")
 
         train_portfolio_returns(filename, portfolio, no_lags, zero_init=False)

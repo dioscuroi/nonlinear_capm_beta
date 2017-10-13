@@ -125,8 +125,6 @@ def train_portfolio_helper(filename, pf_returns, mktrf, zero_init):
 
     beta = compute_beta(param=params, freq=freq, no_lags=no_lags)
 
-    assert (not check_if_overfitted_by_beta(beta))
-
     beta0 = beta[:, 0]
     beta20 = np.sum(beta, axis=1)
 
@@ -134,38 +132,44 @@ def train_portfolio_helper(filename, pf_returns, mktrf, zero_init):
     beta_delay = np.mean(beta20) - np.mean(beta0)
     beta_convexity = (beta20[0] + beta20[-1]) / 2 - beta20[int((len(beta20) - 1) / 2)]
 
-    # Save the results to SQL server
-    sql_loader = DataLoader(connect=True)
-
-    query = """
-        select max(id)
-        from beta_portfolios
-        where filename = '{}' and portfolio = '{}' and lags = {}
-    """.format(filename, pf_name, no_lags)
-
-    max_id = sql_loader.sql_query_select(query)
-
-    if max_id.iloc[0,0] is None:
-        next_id = 1
-    else:
-        next_id = max_id.iloc[0,0] + 1
-
-    query = """
-      insert into beta_portfolios
-      VALUES
-      ('{}', '{}', {}, {}, {}, now(), '{}', {}, {}, {})
-    """.format(filename, pf_name, no_lags, next_id, no_obs,
-               json.dumps(params), beta_average, beta_delay, beta_convexity)
-
-    sql_loader.sql_query_commit(query)
-
     print("Results:")
     print(" - filename: {}, portfolio: {}".format(filename, pf_name))
     print(" - beta_average: {:.3f}, beta_delay: {:.3f}, beta_convexity: {:.3f}".format(
         beta_average, beta_delay, beta_convexity))
     print("")
 
-    sql_loader.close()
+    # save the results to SQL server if beta is not overfitted
+    if not check_if_overfitted_by_beta(beta):
+
+        sql_loader = DataLoader(connect=True)
+
+        query = """
+            select max(id)
+            from beta_portfolios
+            where filename = '{}' and portfolio = '{}' and lags = {}
+        """.format(filename, pf_name, no_lags)
+
+        max_id = sql_loader.sql_query_select(query)
+
+        if max_id.iloc[0,0] is None:
+            next_id = 1
+        else:
+            next_id = max_id.iloc[0,0] + 1
+
+        query = """
+          insert into beta_portfolios
+          VALUES
+          ('{}', '{}', {}, {}, {}, now(), '{}', {}, {}, {})
+        """.format(filename, pf_name, no_lags, next_id, no_obs,
+                   json.dumps(params), beta_average, beta_delay, beta_convexity)
+
+        sql_loader.sql_query_commit(query)
+
+        sql_loader.close()
+
+    else:
+        print("* Do not save the results because the beta is overfitted *")
+        print("")
 
     return
 
